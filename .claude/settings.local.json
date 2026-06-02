@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e ' *)",
+      "Bash(node -e \"const fs=require\\('fs'\\); const content=fs.readFileSync\\('c:/DEV/Extension/content.js','utf8'\\); const lines=content.split\\('\\\\n'\\); console.log\\(JSON.stringify\\(lines[53]\\)\\);\")",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git branch *)",
+      "Bash(git remote *)"
+    ]
+  }
+}
