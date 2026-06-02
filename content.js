@@ -24,17 +24,24 @@ function loadAnswers() {
   });
 }
 
+function isContextValid() {
+  try { return !!chrome.runtime?.id; } catch { return false; }
+}
+
 function saveAnswers() {
-  chrome.storage.local.set({ [STORAGE_KEY]: knownAnswers });
+  if (!isContextValid()) return;
+  try { chrome.storage.local.set({ [STORAGE_KEY]: knownAnswers }); } catch {}
 }
 
 function savePending() {
-  chrome.storage.local.set({ [PENDING_KEY]: pendingAnswers });
+  if (!isContextValid()) return;
+  try { chrome.storage.local.set({ [PENDING_KEY]: pendingAnswers }); } catch {}
 }
 
 function clearPending() {
   pendingAnswers = {};
-  chrome.storage.local.remove(PENDING_KEY);
+  if (!isContextValid()) return;
+  try { chrome.storage.local.remove(PENDING_KEY); } catch {}
 }
 
 // ─── Page detection (URL-based, reliable) ────────────────────────────────────
@@ -439,6 +446,9 @@ function startMainObserver() {
         console.log('[CM Helper] Pending:', qText.substring(0, 40), '→', answerText.substring(0, 40));
       }
     }
+
+    // Stop if extension was reloaded — prevents "context invalidated" errors
+    if (!isContextValid()) { observer.disconnect(); return; }
 
     // ── 2. Auto-fill new questions + detect result page ─────────────────────
     clearTimeout(watchDebounce);
