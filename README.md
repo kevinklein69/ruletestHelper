@@ -19,6 +19,8 @@ Eine Chrome Extension für [classmarker.com](https://classmarker.com), die beim 
 
 1. Dieses Repository herunterladen (grüner **Code**-Button → **Download ZIP**)
 2. ZIP entpacken
+   - **Windows:** Rechtsklick auf die ZIP-Datei → **Alle extrahieren**
+   - **Mac:** Doppelklick auf die ZIP-Datei
 3. Chrome öffnen → `chrome://extensions`
 4. **Entwicklermodus** oben rechts aktivieren
 5. **Entpackte Erweiterung laden** → den entpackten Ordner auswählen
