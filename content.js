@@ -135,8 +135,8 @@ function createOverlay() {
   overlayEl.id = 'cm-helper-overlay';
   overlayEl.innerHTML = `
     <div id="cm-header">
-      🏒 Regeltest Helper
-      <button id="cm-toggle">–</button>
+      <span id="cm-title">🏒 Regeltest Helper</span>
+      <button id="cm-toggle">▴</button>
     </div>
     <div id="cm-body">
       <div id="cm-status">Initialisiere…</div>
@@ -157,11 +157,15 @@ function createOverlay() {
   overlayStatus = document.getElementById('cm-status');
   overlayCount  = document.getElementById('cm-count');
 
-  let collapsed = false;
+  let collapsed = true;
+  overlayEl.classList.add('cm-collapsed');
+  document.getElementById('cm-body').style.display = 'none';
+
   document.getElementById('cm-toggle').addEventListener('click', () => {
     collapsed = !collapsed;
+    overlayEl.classList.toggle('cm-collapsed', collapsed);
     document.getElementById('cm-body').style.display = collapsed ? 'none' : 'block';
-    document.getElementById('cm-toggle').textContent  = collapsed ? '+' : '–';
+    document.getElementById('cm-toggle').textContent  = collapsed ? '▴' : '▾';
   });
 
   document.getElementById('cm-autofill-btn').addEventListener('click', fillCurrentQuestion);

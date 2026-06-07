@@ -5,99 +5,244 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ClassMarker Regeltest Helper</title>
   <style>
+    :root {
+      --ice: #6ee7f5;
+      --ice-soft: rgba(110, 231, 245, 0.35);
+      --ice-dim: #3c8ea3;
+      --rink-bg: #070b14;
+      --rink-bg-2: #0d1424;
+      --panel: rgba(18, 30, 50, 0.6);
+      --panel-border: rgba(110, 231, 245, 0.16);
+      --text: #dce8f5;
+      --text-dim: #8195af;
+      --danger: #ff3f5e;
+      --danger-glow: rgba(255, 63, 94, 0.32);
+      --warm: #ffb648;
+      --font-display: 'Bahnschrift', 'Haettenschweiler', 'Arial Narrow', sans-serif;
+      --font-body: 'Iowan Old Style', 'Charter', Georgia, 'Times New Roman', serif;
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      width: 280px;
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: #1a1a2e;
-      color: #e0e0e0;
+      width: 292px;
+      font-family: var(--font-body);
+      background:
+        radial-gradient(ellipse 140% 90% at 50% -20%, rgba(110, 231, 245, 0.12), transparent 60%),
+        linear-gradient(180deg, var(--rink-bg) 0%, var(--rink-bg-2) 100%);
+      color: var(--text);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* faint diagonal rink-board hazard stripes */
+    body::before {
+      content: '';
+      position: absolute;
+      inset: -40% -10%;
+      background: repeating-linear-gradient(
+        -38deg,
+        transparent 0 26px,
+        rgba(110, 231, 245, 0.025) 26px 30px
+      );
+      pointer-events: none;
+      z-index: 0;
     }
 
     header {
-      background: #0f3460;
-      padding: 14px 16px;
+      position: relative;
+      z-index: 1;
+      background: linear-gradient(135deg, #0d2438, #0a1830);
+      padding: 16px 18px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
+      border-bottom: 1px solid var(--panel-border);
+    }
+
+    .badge {
+      flex-shrink: 0;
+      font-size: 21px;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 35% 30%, rgba(110, 231, 245, 0.25), rgba(110, 231, 245, 0.05));
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      filter: drop-shadow(0 0 8px rgba(110, 231, 245, 0.25));
+    }
+
+    .title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
     }
 
     header h1 {
+      font-family: var(--font-display);
       font-size: 15px;
-      font-weight: bold;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .subtitle {
+      font-family: var(--font-display);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ice-dim);
     }
 
     .content {
-      padding: 14px 16px;
+      position: relative;
+      z-index: 1;
+      padding: 18px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
     }
 
-    .stat-box {
-      background: #16213e;
-      border: 1px solid #0f3460;
-      border-radius: 8px;
-      padding: 10px 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .scoreboard {
+      position: relative;
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 14px 16px 16px;
+      text-align: center;
+      overflow: hidden;
+      backdrop-filter: blur(6px);
     }
 
-    .stat-label { font-size: 12px; color: #7a9cc0; }
-    .stat-value { font-size: 20px; font-weight: bold; color: #a0cfff; }
+    .scoreboard::after {
+      content: '';
+      position: absolute;
+      top: -60%;
+      left: -30%;
+      width: 55%;
+      height: 220%;
+      background: linear-gradient(100deg, transparent, rgba(110, 231, 245, 0.08), transparent);
+      transform: translateX(-60%) rotate(8deg);
+      animation: cm-sweep 5.5s ease-in-out infinite;
+    }
+
+    @keyframes cm-sweep {
+      0%, 100% { transform: translateX(-60%) rotate(8deg); }
+      50%      { transform: translateX(260%) rotate(8deg); }
+    }
+
+    .scoreboard-label {
+      position: relative;
+      font-family: var(--font-display);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      position: relative;
+      display: block;
+      font-family: var(--font-display);
+      font-size: 42px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--ice);
+      text-shadow: 0 0 18px var(--ice-soft), 0 0 3px rgba(255, 255, 255, 0.4);
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
 
     .info {
       font-size: 12px;
-      color: #7a9cc0;
-      line-height: 1.5;
+      line-height: 1.6;
+      color: var(--text-dim);
+      padding: 12px 14px;
+      background: rgba(110, 231, 245, 0.04);
+      border-left: 2px solid var(--ice-dim);
+      border-radius: 0 8px 8px 0;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .divider span {
+      display: block;
+      height: 3px;
+      border-radius: 2px;
+      background: var(--ice-dim);
+      opacity: 0.45;
+    }
+
+    .divider span:nth-child(1) { width: 30px; }
+    .divider span:nth-child(2) { width: 8px; opacity: 0.9; background: var(--ice); }
+    .divider span:nth-child(3) { width: 30px; }
+
+    #status {
+      font-family: var(--font-display);
+      font-size: 11px;
+      letter-spacing: 0.07em;
+      color: var(--ice);
+      min-height: 16px;
+      text-align: center;
+      text-transform: uppercase;
     }
 
     button {
       width: 100%;
-      background: #16213e;
-      color: #e0e0e0;
-      border: 1px solid #0f3460;
-      border-radius: 8px;
-      padding: 9px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 63, 94, 0.07);
+      color: var(--text);
+      border: 1px solid rgba(255, 63, 94, 0.28);
+      border-radius: 10px;
+      padding: 11px 16px;
       cursor: pointer;
-      font-size: 13px;
+      font-family: var(--font-body);
+      font-size: 12.5px;
       text-align: left;
-      transition: background 0.2s;
+      transition: background 0.18s ease, border-color 0.18s ease, transform 0.12s ease, box-shadow 0.18s ease;
     }
 
-    button:hover { background: #0f3460; }
-
-    #clear-btn {
-      color: #ff6b6b;
-      border-color: #6b1a1a;
-      font-size: 12px;
+    button:hover {
+      background: rgba(255, 63, 94, 0.16);
+      border-color: var(--danger);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px var(--danger-glow);
     }
 
-    #clear-btn:hover { background: #3d0000; }
-
-    .divider {
-      height: 1px;
-      background: #0f3460;
+    button:active {
+      transform: translateY(0) scale(0.98);
     }
 
-    #status {
-      font-size: 12px;
-      color: #a0cfff;
-      min-height: 16px;
-      text-align: center;
-    }
+    #clear-btn { color: #ffb3c0; }
+
+    .btn-icon { font-size: 14px; }
   </style>
 </head>
 <body>
   <header>
-    <span style="font-size:22px">🏒</span>
-    <h1>Eishockey Regeltest Helper</h1>
+    <div class="badge">🏒</div>
+    <div class="title-group">
+      <h1>Regeltest Helper</h1>
+      <span class="subtitle">Eishockey · Auto-Pilot</span>
+    </div>
   </header>
 
   <div class="content">
-    <div class="stat-box">
-      <span class="stat-label">Gespeicherte Fragen</span>
+    <div class="scoreboard">
+      <div class="scoreboard-label">Gespeicherte Fragen</div>
       <span class="stat-value" id="count">–</span>
     </div>
 
@@ -105,11 +250,14 @@
       Mache den Test, sieh dir die Ergebnisse an — die richtigen Antworten werden automatisch gespeichert. Beim nächsten Durchlauf wird alles automatisch ausgefüllt.
     </p>
 
-    <div class="divider"></div>
+    <div class="divider"><span></span><span></span><span></span></div>
 
     <div id="status"></div>
 
-    <button id="clear-btn">🗑 Alle gespeicherten Antworten löschen</button>
+    <button id="clear-btn">
+      <span class="btn-icon">🗑</span>
+      <span>Alle gespeicherten Antworten löschen</span>
+    </button>
   </div>
 
   <script src="popup.js"></script>

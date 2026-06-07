@@ -3,51 +3,118 @@
   bottom: 20px;
   right: 20px;
   z-index: 999999;
-  width: 220px;
-  background: #1a1a2e;
-  color: #e0e0e0;
-  border-radius: 10px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-  font-family: 'Segoe UI', Arial, sans-serif;
+  width: 244px;
+  background:
+    radial-gradient(ellipse 160% 70% at 50% -10%, rgba(110, 231, 245, 0.08), transparent 60%),
+    linear-gradient(180deg, rgba(15, 23, 40, 0.94), rgba(7, 11, 20, 0.97));
+  color: #dce8f5;
+  border-radius: 14px;
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(110, 231, 245, 0.12),
+    0 0 28px rgba(110, 231, 245, 0.07);
+  font-family: 'Iowan Old Style', 'Charter', Georgia, 'Times New Roman', serif;
   font-size: 13px;
   overflow: hidden;
-  border: 1px solid #0f3460;
+  border: 1px solid rgba(110, 231, 245, 0.16);
+  backdrop-filter: blur(10px);
+  animation: cm-rise 0.4s cubic-bezier(.2, .8, .2, 1);
+}
+
+@keyframes cm-rise {
+  from { opacity: 0; transform: translateY(18px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 #cm-header {
-  background: #0f3460;
-  padding: 8px 12px;
+  background: linear-gradient(135deg, #123349, #0a1c30);
+  padding: 11px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-weight: bold;
-  font-size: 14px;
+  gap: 10px;
+  font-family: 'Bahnschrift', 'Haettenschweiler', 'Arial Narrow', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   cursor: default;
   user-select: none;
+  border-bottom: 1px solid rgba(110, 231, 245, 0.14);
+  transition: padding 0.2s ease, border-color 0.2s ease;
+}
+
+#cm-title {
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 200px;
+  opacity: 1;
+  transition: max-width 0.22s ease, opacity 0.16s ease, margin 0.22s ease;
+}
+
+/* ── Collapsed: shrink to a discreet little tab in the corner ── */
+#cm-helper-overlay.cm-collapsed {
+  width: auto;
+  background: rgba(10, 16, 28, 0.7);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+  border-color: rgba(110, 231, 245, 0.1);
+  backdrop-filter: blur(6px);
+}
+
+#cm-helper-overlay.cm-collapsed #cm-header {
+  padding: 7px;
+  border-bottom-color: transparent;
+  background: transparent;
+}
+
+#cm-helper-overlay.cm-collapsed #cm-title {
+  max-width: 0;
+  opacity: 0;
+  margin: 0;
+}
+
+#cm-helper-overlay.cm-collapsed #cm-toggle {
+  opacity: 0.45;
+}
+
+#cm-helper-overlay.cm-collapsed:hover #cm-toggle {
+  opacity: 1;
+}
+
+#cm-helper-overlay.cm-collapsed:hover {
+  background: rgba(13, 20, 36, 0.88);
+  border-color: rgba(110, 231, 245, 0.22);
 }
 
 #cm-toggle {
-  background: transparent;
-  border: 1px solid #e0e0e0;
-  color: #e0e0e0;
-  border-radius: 4px;
-  width: 22px;
-  height: 22px;
+  flex-shrink: 0;
+  background: rgba(110, 231, 245, 0.06);
+  border: 1px solid rgba(110, 231, 245, 0.32);
+  color: #6ee7f5;
+  border-radius: 6px;
+  width: 24px;
+  height: 24px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1;
   padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease, opacity 0.18s ease;
 }
 
 #cm-toggle:hover {
-  background: rgba(255,255,255,0.15);
+  background: rgba(110, 231, 245, 0.18);
+  box-shadow: 0 0 12px rgba(110, 231, 245, 0.32);
+}
+
+#cm-toggle:active {
+  transform: scale(0.92);
 }
 
 #cm-body {
-  padding: 10px 12px;
+  padding: 12px 14px 14px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -55,58 +122,89 @@
 
 #cm-status {
   font-size: 12px;
-  color: #a0cfff;
+  color: #6ee7f5;
   min-height: 16px;
   word-break: break-word;
+  padding: 8px 10px;
+  background: rgba(110, 231, 245, 0.05);
+  border-left: 2px solid #3c8ea3;
+  border-radius: 0 6px 6px 0;
+  line-height: 1.4;
 }
 
 #cm-count {
-  font-size: 11px;
-  color: #7a9cc0;
+  font-family: 'Bahnschrift', 'Haettenschweiler', 'Arial Narrow', sans-serif;
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8195af;
+  padding: 0 2px;
+}
+
+#cm-pending {
+  font-size: 10.5px;
+  font-style: italic;
+  color: #ffb648;
+  padding: 0 2px;
 }
 
 #cm-body button {
-  background: #16213e;
-  color: #e0e0e0;
-  border: 1px solid #0f3460;
-  border-radius: 6px;
-  padding: 6px 10px;
+  background: rgba(110, 231, 245, 0.05);
+  color: #dce8f5;
+  border: 1px solid rgba(110, 231, 245, 0.15);
+  border-radius: 8px;
+  padding: 8px 12px;
   cursor: pointer;
   font-size: 12px;
+  font-family: inherit;
   text-align: left;
-  transition: background 0.2s;
+  transition: background 0.16s ease, border-color 0.16s ease, transform 0.12s ease, box-shadow 0.16s ease;
 }
 
 #cm-body button:hover {
-  background: #0f3460;
+  background: rgba(110, 231, 245, 0.12);
+  border-color: rgba(110, 231, 245, 0.4);
+  transform: translateX(2px);
+}
+
+#cm-body button:active {
+  transform: translateX(2px) scale(0.98);
 }
 
 #cm-autofill-btn {
-  background: #1a6b3a !important;
-  border-color: #2d9b55 !important;
-  font-weight: bold;
+  background: rgba(110, 231, 245, 0.13) !important;
+  border-color: #6ee7f5 !important;
+  color: #d6fbff !important;
+  font-weight: 700;
+  box-shadow: 0 0 16px rgba(110, 231, 245, 0.18);
 }
 
 #cm-autofill-btn:hover {
-  background: #2d9b55 !important;
+  background: rgba(110, 231, 245, 0.24) !important;
+  box-shadow: 0 0 22px rgba(110, 231, 245, 0.32);
 }
 
 #cm-learn-btn {
-  background: #1a4b6b !important;
-  border-color: #2d7bb5 !important;
-  font-weight: bold;
+  background: rgba(255, 182, 72, 0.1) !important;
+  border-color: rgba(255, 182, 72, 0.55) !important;
+  color: #ffe2b0 !important;
+  font-weight: 700;
 }
 
 #cm-learn-btn:hover {
-  background: #2d7bb5 !important;
+  background: rgba(255, 182, 72, 0.2) !important;
+  box-shadow: 0 0 18px rgba(255, 182, 72, 0.22);
 }
 
 #cm-clear-btn {
-  color: #ff6b6b !important;
-  border-color: #6b1a1a !important;
+  color: #ffb3c0 !important;
+  border-color: rgba(255, 63, 94, 0.35) !important;
   font-size: 11px;
+  margin-top: 2px;
 }
 
 #cm-clear-btn:hover {
-  background: #3d0000 !important;
+  background: rgba(255, 63, 94, 0.14) !important;
+  border-color: #ff3f5e !important;
+  box-shadow: 0 0 16px rgba(255, 63, 94, 0.25);
 }
