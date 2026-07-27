@@ -146,6 +146,7 @@ function createOverlay() {
       <button id="cm-learn-btn" style="display:none">📖 Antworten lernen</button>
       <button id="cm-export-btn">📤 Antworten exportieren (JSON)</button>
       <button id="cm-export-html-btn">📋 Als HTML exportieren</button>
+      <button id="cm-export-pdf-btn">📄 Als PDF exportieren (fürs Handy)</button>
       <button id="cm-import-btn">📥 Antworten importieren</button>
       <input id="cm-import-input" type="file" accept=".json" style="display:none">
       <button id="cm-debug-btn">🔍 DOM analysieren</button>
@@ -172,6 +173,7 @@ function createOverlay() {
   document.getElementById('cm-learn-btn').addEventListener('click', scrollAndLearn);
   document.getElementById('cm-export-btn').addEventListener('click', exportAnswers);
   document.getElementById('cm-export-html-btn').addEventListener('click', exportAnswersHTML);
+  document.getElementById('cm-export-pdf-btn').addEventListener('click', exportAnswersPDF);
   document.getElementById('cm-import-btn').addEventListener('click', () => {
     document.getElementById('cm-import-input').click();
   });
@@ -588,33 +590,36 @@ function exportAnswersHTML() {
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Eishockey Regeltest – Antworten</title>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Segoe UI',Arial,sans-serif;background:#1a1a2e;color:#e0e0e0;min-height:100vh}
-    header{background:#0f3460;padding:16px 20px;position:sticky;top:0;z-index:10;box-shadow:0 2px 10px rgba(0,0,0,.4)}
-    h1{font-size:18px;margin-bottom:6px}
-    .meta{font-size:12px;color:#7a9cc0;margin-bottom:10px}
-    #search{width:100%;padding:10px 14px;border-radius:8px;border:1px solid #2d7bb5;background:#16213e;color:#e0e0e0;font-size:15px;outline:none}
+    body{font-family:'Segoe UI',Arial,sans-serif;background:#1a1a2e;color:#e0e0e0;min-height:100vh;-webkit-text-size-adjust:100%}
+    header{background:#0f3460;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0));padding-top:calc(12px + env(safe-area-inset-top,0));position:sticky;top:0;z-index:10;box-shadow:0 2px 10px rgba(0,0,0,.4)}
+    h1{font-size:17px;margin-bottom:4px}
+    .meta{font-size:12px;color:#7a9cc0;margin-bottom:8px}
+    /* font-size:16px stops iOS Safari zooming in on focus */
+    #search{width:100%;padding:12px 14px;border-radius:8px;border:1px solid #2d7bb5;background:#16213e;color:#e0e0e0;font-size:16px;outline:none}
     #search::placeholder{color:#7a9cc0}
     #search:focus{border-color:#a0cfff}
-    #count{font-size:12px;color:#7a9cc0;margin-top:8px}
+    #count{font-size:12px;color:#7a9cc0;margin-top:6px}
     main{padding:16px;max-width:700px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
     .card{background:#16213e;border:1px solid #0f3460;border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
     .card.hidden{display:none}
     .num{font-size:11px;color:#7a9cc0}
-    .q{font-size:14px;line-height:1.5}
+    /* overflow-wrap breaks the long glued words (…unterbrechungoder) instead of scrolling sideways */
+    .q{font-size:15px;line-height:1.5;overflow-wrap:anywhere}
     .answers{list-style:none;display:flex;flex-direction:column;gap:4px}
-    .answer{background:#1a4b2e;border:1px solid #2d9b55;border-radius:6px;padding:6px 10px;font-size:13px;color:#7ddd9a}
+    .answer{background:#1a4b2e;border:1px solid #2d9b55;border-radius:6px;padding:8px 10px;font-size:14px;color:#7ddd9a;overflow-wrap:anywhere}
+    mark{background:#ffd24a;color:#1a1a2e;border-radius:2px;padding:0 1px}
     #no-results{display:none;text-align:center;color:#7a9cc0;padding:40px 20px;font-size:14px}
   </style>
 </head>
 <body>
   <header>
     <h1>🏒 Eishockey Regeltest – Antworten</h1>
-    <p class="meta">Exportiert am ${date} &middot; ${total} Fragen gespeichert</p>
-    <input id="search" type="search" placeholder="Frage oder Antwort suchen…" autocomplete="off">
+    <p class="meta">Exportiert am ${date} &middot; ${total} Fragen &middot; Suche v2 (Multi-Wort)</p>
+    <input id="search" type="search" placeholder="Frage oder Antwort suchen…" autocomplete="off" autocapitalize="off" autocorrect="off">
     <div id="count">${total} Fragen angezeigt</div>
   </header>
   <main id="list">
@@ -622,21 +627,39 @@ function exportAnswersHTML() {
     <div id="no-results">Keine Fragen gefunden.</div>
   </main>
   <script>
+    // Fold umlauts/diacritics so "muessen"/"mussen" both find "müssen".
+    function fold(s){
+      return s.toLowerCase()
+        .replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss')
+        .normalize('NFD').replace(/[\\u0300-\\u036f]/g,'')
+        .replace(/\\s+/g,' ').trim();
+    }
     const search = document.getElementById('search');
     const cards  = document.querySelectorAll('.card');
     const countEl = document.getElementById('count');
     const noRes  = document.getElementById('no-results');
-    search.addEventListener('input', () => {
-      const q = search.value.toLowerCase().trim();
+    // Precompute folded haystack per card once.
+    cards.forEach(c => { c._hay = fold(c.dataset.search); });
+    function runSearch() {
+      // Split into words → every word must match (AND), order-independent.
+      const tokens = fold(search.value).split(' ').filter(Boolean);
       let n = 0;
       cards.forEach(c => {
-        const show = !q || c.dataset.search.includes(q);
+        const show = tokens.length === 0 || tokens.every(t => c._hay.includes(t));
         c.classList.toggle('hidden', !show);
         if (show) n++;
       });
       countEl.textContent = n + ' Frage' + (n !== 1 ? 'n' : '') + ' angezeigt';
       noRes.style.display = n === 0 ? 'block' : 'none';
-    });
+    }
+    // Mobile keyboards (predictive text / autocorrect) don't fire 'input'
+    // reliably during composition — bind the extra events so it still runs.
+    ['input','compositionend','change','search','keyup'].forEach(ev =>
+      search.addEventListener(ev, runSearch));
+    // Proof that JS actually runs here. If you DON'T see "✅ Suche aktiv"
+    // on your phone, the file was opened in an in-app viewer without JS —
+    // open it in a real browser (Chrome/Safari) instead.
+    countEl.textContent = '✅ Suche aktiv · ' + countEl.textContent;
   </script>
 </body>
 </html>`;
@@ -649,6 +672,61 @@ function exportAnswersHTML() {
   a.click();
   URL.revokeObjectURL(url);
   setStatus(`📋 ${total} Antworten als HTML exportiert.`);
+}
+
+function exportAnswersPDF() {
+  const total = Object.keys(knownAnswers).length;
+  if (total === 0) {
+    setStatus('⚠️ Keine Antworten zum Exportieren.');
+    return;
+  }
+
+  const entries = Object.entries(knownAnswers);
+  const cardsHtml = entries.map(([q, answers], i) => {
+    const answersHtml = answers.map(a => `<li>${escapeHtml(a)}</li>`).join('');
+    return `<div class="card">
+        <div class="num">Frage ${i + 1} von ${total}</div>
+        <div class="q">${escapeHtml(q)}</div>
+        <ul>${answersHtml}</ul>
+      </div>`;
+  }).join('\n');
+
+  const date = new Date().toLocaleDateString('de-DE');
+  // Light theme + print CSS: readable on paper/PDF, cards don't break across pages.
+  const html = `<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Eishockey Regeltest – Antworten</title>
+  <style>
+    @page { margin: 14mm; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',Arial,sans-serif;color:#111;line-height:1.5}
+    h1{font-size:18px;margin-bottom:2px}
+    .meta{font-size:11px;color:#555;margin-bottom:14px}
+    .card{border:1px solid #bbb;border-radius:6px;padding:10px 12px;margin-bottom:8px;page-break-inside:avoid}
+    .num{font-size:10px;color:#777;margin-bottom:3px}
+    .q{font-size:13px;font-weight:600;margin-bottom:6px;overflow-wrap:anywhere}
+    ul{list-style:none}
+    li{font-size:12px;background:#eaf7ee;border:1px solid #bfe3c8;border-radius:4px;padding:5px 8px;margin-top:3px;overflow-wrap:anywhere}
+  </style>
+</head>
+<body onload="window.print()">
+  <h1>🏒 Eishockey Regeltest – Antworten</h1>
+  <p class="meta">Exportiert am ${date} · ${total} Fragen · im PDF-Viewer mit der 🔍-Lupe suchen</p>
+  ${cardsHtml}
+</body>
+</html>`;
+
+  // Open in a new tab; onload triggers the print dialog → "Als PDF speichern".
+  const w = window.open('', '_blank');
+  if (!w) {
+    setStatus('⚠️ Pop-up blockiert – bitte Pop-ups für diese Seite erlauben.');
+    return;
+  }
+  w.document.write(html);
+  w.document.close();
+  setStatus(`📄 ${total} Antworten – im Druckdialog "Als PDF speichern" wählen.`);
 }
 
 function importAnswers(file) {
