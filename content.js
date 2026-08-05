@@ -110,17 +110,22 @@ function getQuestionLists() {
 
 // Unique storage key for a question.
 // ClassMarker reuses identical question text for different questions (same stem, different options).
-// We disambiguate by appending sorted aux-input hash values — ClassMarker's own stable answer IDs.
+// We disambiguate by appending the sorted, normalized text of ALL answer options shown for
+// this render.
+//
+// NOTE: we intentionally do NOT use ClassMarker's `input.aux-input` hidden fields for this
+// anymore. Their `.value` is only populated once an option has actually been checked — so a
+// key built from them changes with every click on a multi-select question (1 hash after the
+// first click, 2 hashes after the second, ...) instead of staying stable for the whole
+// question. That produced a separate, partial storage entry per click instead of one entry
+// with all selected answers, which caused only some of the correct checkboxes to be learned
+// / auto-filled for multi-select questions. The answer-text fingerprint below is present from
+// the initial render regardless of click state, so it stays constant while the user selects
+// answers.
 function getQuestionKey(listEl) {
   const qText = getQuestionText(listEl);
   if (!qText) return '';
 
-  // Primary: use ClassMarker's own stable answer-hash values (aux-input hidden fields)
-  const hashes = Array.from(listEl.querySelectorAll('input.aux-input'))
-    .map(i => i.value).filter(Boolean).sort().join(',');
-  if (hashes) return `${qText}|${hashes}`;
-
-  // Fallback: use sorted answer texts — handles cases where aux-inputs are absent
   const answerFp = getAnswerItems(listEl)
     .map(item => getAnswerText(item)).filter(Boolean).sort().join('\x00');
   return answerFp ? `${qText}\x01${answerFp}` : qText;
@@ -345,14 +350,36 @@ function findBestMatch(listEl) {
   // Exact text-only match (backward compat with pre-fingerprint stored data)
   if (knownAnswers[qText]) return knownAnswers[qText];
 
-  // Near-text fallback — strips fingerprint from stored keys before comparing
+  // Near-text fallback — strips fingerprint (either legacy "|" or "\x01" format) from stored
+  // keys before comparing. This only fires when we have NO exact match for the answer options
+  // actually shown right now, i.e. this specific question render was never learned before.
+  //
+  // ClassMarker reuses identical question text for genuinely different questions (different
+  // correct answers depending on which option pool is shown — see getQuestionKey). If several
+  // stored entries share this question's text but disagree on the answer set, we cannot tell
+  // which one belongs to the variant currently on screen. Guessing one of them risks ticking
+  // wrong/incomplete boxes, which is worse than leaving the question unanswered. So: only
+  // auto-fill from this fallback when every matching stored entry agrees on the same answer
+  // set (harmless — same question, just a legacy/slightly different key format) or there is
+  // exactly one candidate. If they disagree, return null and let the user answer manually.
+  const candidates = [];
   for (const [key, val] of Object.entries(knownAnswers)) {
-    const keyText = key.split('|')[0];
+    const keyText = key.split(/[|\x01]/)[0];
     const ratio = Math.min(qText.length, keyText.length) / Math.max(qText.length, keyText.length);
     if (ratio < 0.90) continue;
-    if (qText.includes(keyText) || keyText.includes(qText)) return val;
+    if (!(qText.includes(keyText) || keyText.includes(qText))) continue;
+    candidates.push(val);
   }
-  return null;
+  if (candidates.length === 0) return null;
+
+  const distinctSets = new Set(candidates.map(v => JSON.stringify([...v].sort())));
+  if (distinctSets.size > 1) {
+    console.log('[CM Helper] Mehrdeutig — mehrere unterschiedliche Antwort-Sets für "' +
+      qText.substring(0, 60) + '" gefunden, kein Auto-Fill:', candidates);
+    return null;
+  }
+  // All candidates agree — return the most complete-looking one (longest array).
+  return candidates.reduce((a, b) => (b.length > a.length ? b : a));
 }
 
 function ionClick(el) {
