@@ -8,12 +8,6 @@
     "ein spieler, der einem gegenspieler während des spiels absichtlich denhelm abnimmt, wird mit einer kleinen strafe für \"übertriebene härte\" bestraft.",
     "der helm sollte so befestigt sein, dass er nicht abfallen kann. wenn er abfällt und nicht von einem gegenspieler abgenommen wird, ist er nicht richtig befestigt."
   ],
-  "als das verteidigende team b in der 25. spielminute unter druck gerät, verschiebt der verteidigende spieler b #5 das tor aus seiner regulären position. eine unmittelbare torchance bestand nicht. der ref beurteilt die aktion als absichtlich herbeigeführt. er spricht deshalb team a einen penaltyschuss zu.richtig?|0024535d2869ae1513202a78ce6598ad": [
-    "nein"
-  ],
-  "als das verteidigende team b in der 25. spielminute unter druck gerät, verschiebt der verteidigende spieler b #5 das tor aus seiner regulären position. eine unmittelbare torchance bestand nicht. der ref beurteilt die aktion als absichtlich herbeigeführt. er spricht deshalb team a einen penaltyschuss zu.richtig?|4462320b9e6516934fdb96945bd79839": [
-    "ja"
-  ],
   "als das verteidigende team b in der 25. spielminute unter druck gerät, verschiebt der verteidigende spieler b #5 das tor aus seiner regulären position. eine unmittelbare torchance bestand nicht. der ref beurteilt die aktion als absichtlich herbeigeführt. er verhängt deshalb gegen b #5 eine kleine strafe wegen spielverzögerung.richtig?": [
     "ja"
   ],
@@ -41,20 +35,8 @@
   "begeht das team mit puckbesitz einen regelverstoß, der eine - kleine strafe- kleine bankstrafe- große strafe- disziplinarstrafe- spieldauer-disziplinarstrafe zur folge hat, pfeift der ref sofort ab und verhängt die entsprechende strafe gegen den betroffenen spieler bzw. das betroffene team.richtig?": [
     "ja"
   ],
-  "begeht das team ohne puckbesitz einen regelverstoß, der eine - kleine strafe- kleine bankstrafe- große strafe- disziplinarstrafe- spieldauer-disziplinarstrafe zur folge hat, hebt der ref seinen arm und zeigt so an, dass er die entsprechende strafe aussprechen wird. erlangt das team, gegen welches die strafe angezeigt wird kontrolle über den puck, pfeift der ref ab und verhängt die entsprechende strafe gegen den spieler bzw. gegen das fehlbare team.richtig?|90880c212387d7d506f2d0cfab0d42bd": [
-    "ja"
-  ],
-  "begeht das team ohne puckbesitz einen regelverstoß, der eine - kleine strafe- kleine bankstrafe- große strafe- disziplinarstrafe- spieldauer-disziplinarstrafe zur folge hat, hebt der ref seinen arm und zeigt so an, dass er die entsprechende strafe aussprechen wird. erlangt das team, gegen welches die strafe angezeigt wird kontrolle über den puck, pfeift der ref ab und verhängt die entsprechende strafe gegen den spieler bzw. gegen das fehlbare team.richtig?|bf1c7f7bf64863a2d242603ce3636a0b": [
-    "ja"
-  ],
   "begeht der torhüter während der ausführung des penaltyschusses einen regelverstoß, der eine große strafe oder große strafe plus spieldauer-disziplinarstrafe rechtfertigt, und der ps dadurch erfolglos bleibt, wird die entsprechende strafe gegen den th verhängt und der ps wiederholt.richtig?": [
     "ja"
-  ],
-  "begeht der torhüter während der ausführung des penaltyschusses einen regelverstoß, der eine große strafe plus spieldauer-disziplinarstrafe rechtfertigt, und der ps dadurch erfolglos bleibt, wird|b239304eaa0be88dc12b560aaef348c4": [
-    "... die große strafe plus spieldauer-disziplinarstrafe gegen den th verhängt und der ps wiederholt"
-  ],
-  "begeht der torhüter während der ausführung des penaltyschusses einen regelverstoß, der eine große strafe plus spieldauer-disziplinarstrafe rechtfertigt, und der ps dadurch erfolglos bleibt, wird|b2c04e42e351b84ef242562a7a2811e5": [
-    "... die große strafe plus spieldauer-disziplinarstrafe gegen den th verhängt und der ps gilt als beendet"
   ],
   "begeht der torhüter während der ausführung des penaltyschusses einen regelverstoß, der eine große strafe rechtfertigt, und der ps dadurch erfolglos bleibt, wird": [
     "... die große strafe gegen den th verhängt und der ps wiederholt"
@@ -121,12 +103,6 @@
   "das anspiel muss nach verwarnung wiederholt werden. (ein spieler team b hatte den anspielkreis zu früh betreten.) team a verlangt in diesem moment die auszeit.": [
     "der ref erklärt, dass das verlangen nicht zulässig ist"
   ],
-  "das ende des zweiten drittels steht unmittelbar bevor. der verteidigender spieler b #4 flippt den puck hoch aus der verteidigungszone. als der puck in der luft ist, ertönt die sirene und zeigt das ende des spieldrittels an. der puck geht direkt über das schutzglas aus dem spielfeld. der schiedsrichter|a1c97a1deab3536c4b9968e931d15b2d": [
-    "verhängt nur dann eine kleine strafe, wenn es eindeutig ist, dass der puck vor drittelende aus dem spielfeld ging"
-  ],
-  "das ende des zweiten drittels steht unmittelbar bevor. der verteidigender spieler b #4 flippt den puck hoch aus der verteidigungszone. als der puck in der luft ist, ertönt die sirene und zeigt das ende des spieldrittels an. der puck geht direkt über das schutzglas aus dem spielfeld. der schiedsrichter|f2d5a4b8c3e6ecfd8e69ce582d12c4d4": [
-    "erhängt nur dann eine kleine strafe wegen spielverzögerung, wenn es eindeutig ist, dass der puck vor drittelende aus dem spielfeld ging"
-  ],
   "das etwas hektische 2. drittel ist zu ende. nach der deutlichen sirene und dem abpfiff des schiedsrichter schießt b7 den puck gleichwohl noch ans andere ende des spielfelds.frage: was sieht die regel für diesen fall vor?": [
     "disziplinarstrafe"
   ],
@@ -134,12 +110,6 @@
     "er veranlasst, dass a12 die kleine strafe sofort absitzt und sorgt dafür, dass der coach team a einen anderen p-schützen benennt"
   ],
   "das prinzip, wonach strafen gegen den torhüter von einem feldspieler zu verwirklichen sind, der sich auf dem eis befand, als der th den regelverstoß beging, gilt nur für strafen, die auf der strafzeituhr angezeigt werden.richtig?": [
-    "nein"
-  ],
-  "das recht eines teams, handschuhe eines gegnerischen feldspielers zu beanstanden, weil deren innenfläche ganz oder teilweise entfernt oder ausgeschnitten ist, um die bloße hand einsetzen zu können, gilt in der spielverlängerung.richtig?|88db341a3fddf56418098a5b1351be26": [
-    "ja"
-  ],
-  "das recht eines teams, handschuhe eines gegnerischen feldspielers zu beanstanden, weil deren innenfläche ganz oder teilweise entfernt oder ausgeschnitten ist, um die bloße hand einsetzen zu können, gilt in der spielverlängerung.richtig?|ea54d31e1a49219136e545162bd3e392": [
     "nein"
   ],
   "das recht eines teams, handschuhe eines gegnerischen feldspielers zu beanstanden, weil deren innenfläche ganz oder teilweise entfernt oder ausgeschnitten ist, um die bloße hand einsetzen zu können, gilt nicht mehr ab spielzeit 55:00.richtig?": [
@@ -191,12 +161,6 @@
   ],
   "der coach team a hat seinen spieler a18 als penaltyschütze benannt. kurz darauf lässt er den ref wissen, dass er statt a18 lieber den spieler a5 schießen lassen möchte. wie hat der ref vorzugehen?": [
     "er klärt den coach team a darüber auf, dass eine änderung des p-schützen nicht zulässig ist"
-  ],
-  "der gegnerische kapitän verlangt vor ausführung des penaltyschusses die vermessung des stocks des p-schützen (krümmung des stockblatts). das ergebnis der vermessung besteht darin, dass die krümmung des stockblatts den regeln entspricht. der ref|ec95668ae441501be2e9e71e9b2b40e4": [
-    "verhängt gegen das gegnerische team eine kleine bankstrafe, lässt dann den p-schuss ausführen und veranlasst, dass die kleine bankstrafe selbst dann zu verwirklichen ist, wenn der p-schütze ein tor erzielt"
-  ],
-  "der gegnerische kapitän verlangt vor ausführung des penaltyschusses die vermessung des stocks des p-schützen (krümmung des stockblatts). das ergebnis der vermessung besteht darin, dass die krümmung des stockblatts den regeln entspricht. der ref|f889135dd692c74dc55c9595a8526914": [
-    "verhängt gegen den gegnerischen kapitän eine kleine strafe, lässt dann den p-schuss ausführen und veranlasst, dass die kleine strafe ein automatisches ende findet, wenn der p-schütze ein tor erzielt"
   ],
   "der gegnerische kapitän verlangt vor ausführung des penaltyschusses die vermessung des stocks des p-schützen (krümmung des stockblatts). das ergebnis der vermessung besteht darin, dass die krümmung des stockblatts regelwidrig ist. der ref": [
     "verhängt gegen den p-schützen eine kleine strafe, die dieser sofort verwirklichen muss und veranlasst, dass ein anderer p-schützen benannt wird"
@@ -261,12 +225,6 @@
   ],
   "der ref erkennt, dass der torhüter bei der abwehr des penaltyschusses versehentlich das tor verschiebt, der schuss des penaltyschützen letztlich aber die torlinie in dem bereich überquerte, der vom torgehäuse abgedeckt wäre, würde es nicht verschoben worden sein. er entscheidet": [
     "... auf ein gültiges tor"
-  ],
-  "der ref erkennt, dass der torhüter bei der abwehr des penaltyschusses versehentlich das tor verschiebt, kann aber nicht mit sicherheit sagen, ob der puck in der weiteren folge die torlinie an einer stelle zwischen den „gedachten“ pfosten und unterhalb der querstange überquert hatte oder außerhalb dieses bereichs. er entscheidet|829a72e865f84e6a6fb846d273d5fd7e": [
-    "auf wiederholung des ps und verhängt außerdem eine kleine strafe gegen den th wegen spielverzögerung"
-  ],
-  "der ref erkennt, dass der torhüter bei der abwehr des penaltyschusses versehentlich das tor verschiebt, kann aber nicht mit sicherheit sagen, ob der puck in der weiteren folge die torlinie an einer stelle zwischen den „gedachten“ pfosten und unterhalb der querstange überquert hatte oder außerhalb dieses bereichs. er entscheidet|cb0a1252cee466248665316f54fcbccc": [
-    "auf wiederholung des ps"
   ],
   "der ref führt das verfahren auf spielerwechsel im spielunterbruch. durch heben seines arms signalisiert er dem gastteam, das ein spielerwechsel nicht mehr möglich ist. in diesem moment verlangt der trainer des gastteams die auszeit.": [
     "der ref gewährt die auszeit"
@@ -338,14 +296,6 @@
   ],
   "der spieler wurde bereits vom schiedsrichter verwarnt, weil er seinen ellbogenschutz nicht unter sondern über dem trikot trägt. für den wiederholungsfall desselben spielers in diesem spiel sieht die regel folgendes szenario vor: erste wiederholung = kleine strafezweite wiederholung = disziplinarstrafedritter wiederholungsfall = spieldauer-disziplinarstraferichtig?": [
     "ja"
-  ],
-  "der spieler wurde bereits vom schiedsrichter verwarnt, weil er seinen ellbogenschutz nicht unter sondern über dem trikot trägt. für den wiederholungsfall desselben spielers in diesem spiel sieht die regel folgendes szenario vor:|83f555ff0f10c8d61f15b75dbe1c2b79,99e444e6d07d2a6c9e0a9ec916922868,9ea35011d9221aa0c1a7767a604aa97b": [
-    "erste wiederholung = erneute verwarnung"
-  ],
-  "der spieler wurde bereits vom schiedsrichter verwarnt, weil er seinen ellbogenschutz nicht unter sondern über dem trikot trägt. für den wiederholungsfall desselben spielers in diesem spiel sieht die regel folgendes szenario vor:|83f555ff0f10c8d61f15b75dbe1c2b79,99e444e6d07d2a6c9e0a9ec916922868,b5dacad073c1e3683b3e934635dfc253": [
-    "dritter wiederholungsfall = spd",
-    "erste wiederholung = kleine strafe",
-    "zweite wiederholung = disziplinarstrafe"
   ],
   "der stock des angreifenden spielers a #4 bricht. von der spielerbank team a wirft ein spieler einen stock in richtung a #4, dessen stock gebrochen ist.der ref erkennt die aktion und": [
     "verhängt gegen team a eine kleine bankstrafe"
@@ -445,12 +395,6 @@
   "die regel sieht für einen check gegen die bande (boarding) vor, dass eine große strafe zwingend mit einer zusätzlichen spd verbunden werden muss.richtig?": [
     "nein"
   ],
-  "die regel sieht für einen check mit dem knie (kneeing) vor, dass eine große strafe zwingend mit einer zusätzlichen spd verbunden werden muss.richtig?|045b0c3d59ce29f7ddfda3cd8025ef9e": [
-    "ja"
-  ],
-  "die regel sieht für einen check mit dem knie (kneeing) vor, dass eine große strafe zwingend mit einer zusätzlichen spd verbunden werden muss.richtig?|a08fc8fb3f4e23ee134140351e153f8d": [
-    "ja"
-  ],
   "die regel, die das spucken unter strafe stellt, gilt sowohl für spieler als auch für teamoffizielle.richtig?": [
     "ja"
   ],
@@ -469,12 +413,6 @@
   "die sirene ertönt, um das spiel zu beenden und der assistenztrainer der unterlegenen mannschaft stellt sich in die tür der spielerbank und beschimpft die offiziellen auf dem eis. welche strafe ist gegen diesen trainer zu verhängen?": [
     "der assistenztrainer ist mit einer spieldauerdisziplinarstrafe zu belegen."
   ],
-  "die so genannte \"spin-o-rama-bewegung\", bei der der spieler eine 360°-drehung vollführt, während er sich dem tor nähert, ist bei ausführung des penaltyschusses nicht erlaubt.richtig?|90391fd282c18b29be72d691f59d0d15": [
-    "ja"
-  ],
-  "die so genannte \"spin-o-rama-bewegung\", bei der der spieler eine 360°-drehung vollführt, während er sich dem tor nähert, ist bei ausführung des penaltyschusses nicht erlaubt.richtig?|9e5021374d5b0c78510236197a5a8320": [
-    "nein"
-  ],
   "die spieloffiziellen diskutieren die frage, auf welcher seite in der endzone das anspiel nach einer entscheidung auf icing durchzuführen ist.": [
     "das angreifende team darf sich für eine seite in der endzone entscheiden."
   ],
@@ -489,15 +427,6 @@
   ],
   "die verlängerung läuft. der torhüter team a ahnt, dass aus einem fehlschuss seines teams ein vielversprechender gegenangriff team b entstehen könnte. er nimmt seine gesichtsmaske absichtlich ab, um auf diese weise einen spielunterbruch herbeizuführen. r2 hatte diese aktion wahrgenommen. er unterbricht das spiel und spricht dem gegnerischen team einen penaltyschuss zu.richtig?": [
     "nein"
-  ],
-  "die verlängerung läuft. der torhüter team a ahnt, dass aus einem fehlschuss seines teams ein vielversprechender gegenangriff team b entstehen könnte. er nimmt seine gesichtsmaske absichtlich ab, um auf diese weise einen spielunterbruch herbeizuführen. r2 hatte diese aktion wahrgenommen. er unterbricht das spiel und verhängt gegen den torhüter team a eine kleine strafe wegen spielverzögerung.richtig?|63a1942c54ad9c43202df6bc2e3c489f": [
-    "ja"
-  ],
-  "die verlängerung läuft. der torhüter team a ahnt, dass aus einem fehlschuss seines teams ein vielversprechender gegenangriff team b entstehen könnte. er nimmt seine gesichtsmaske absichtlich ab, um auf diese weise einen spielunterbruch herbeizuführen. r2 hatte diese aktion wahrgenommen. er unterbricht das spiel und verhängt gegen den torhüter team a eine kleine strafe wegen spielverzögerung.richtig?|996e37fa23789c66730ee40cbee92a01": [
-    "nein"
-  ],
-  "die verlängerung läuft. der torhüter team a ahnt, dass aus einem fehlschuss seines teams ein vielversprechender gegenangriff team b entstehen könnte. er nimmt seine gesichtsmaske absichtlich ab, um auf diese weise einen spielunterbruch herbeizuführen. r2 hatte diese aktion wahrgenommen. er unterbricht das spiel und verhängt gegen den torhüter team a eine kleine strafe wegen spielverzögerung.richtig?|ee8d671fef14a68ab299091b339d583e": [
-    "ja"
   ],
   "die vermessung des stockes kann der kapitän eines teams innerhalb eines spielunterbruchs verlangen. dieses recht gilt jedoch nicht mehr ab spielzeit 55:00 bzw. overtime/spielentscheidendes penalyschießen.achtung: es gelten die für deutschland gültigen regelungen gem. durchführungsbestimmungen/richtlinien der ligen.richtig?": [
     "ja"
@@ -609,25 +538,7 @@
   "eine kleine bankstrafe muss von irgendeinem feldspieler des betroffenen teams verbüßt werden.richtig?": [
     "ja"
   ],
-  "eine kleine strafe für \"unsportliches verhalten und beschimpfung von spieloffiziellen\" wird nach dieser regel für die folgenden vergehen verhängt:|1b5f15899d281cca7abb4a009825d28f,2ce137f7663ff8d47c1e3887ea4c9f51,bb52453f1bea1dbf59e0659c3928abce": [
-    "wenn ein spieler gegen die bande oder das plexiglas schlägt, um gegen eine entscheidung eines offiziellen zu protestieren.",
-    "wenn ein bestrafter spieler eine zusätzliche strafe wegen \"unsportlichem verhalten\" erhält, entweder bevor oder nachdem er seine ursprüngliche(n) strafe(n) verbüßt hat, wird die zusätzliche kleine strafe zu der noch nicht abgelaufenen zeit hinzugezählt und fortlaufend verbüßt."
-  ],
-  "eine kleine strafe für \"unsportliches verhalten und beschimpfung von spieloffiziellen\" wird nach dieser regel für die folgenden vergehen verhängt:|7dbbd6b0a52e41ba4f12b4a2cc507dce,d94698db5cfec8efd9f329014b847ea7": [
-    "jeder spieler, der mit seinen stöcken oder anderen gegenständen gegen die bande oder das plexiglas schlägt oder in irgendeiner weise die entscheidung eines offiziellen missachtet. wenn dies geschieht, um die aufmerksamkeit der offiziellen aus einem legitimen grund (z.b. schwere verletzung, krankheit, etc.) zu erlangen, muss der schiedsrichter eine ermessensentscheidung treffen.",
-    "wenn ein kapitän, assistenzkapitän oder ein anderer spieler von der spielerbank kommt, um eine entscheidung eines offiziellen auf dem eis zu hinterfragen oder zu widersprechen.",
-    "jeder spieler, der die entscheidung eines offiziellen in frage stellt oder anficht."
-  ],
-  "eine kleine strafe für \"unsportliches verhalten und beschimpfung von spieloffiziellen\" wird nach dieser regel für die folgenden vergehen verhängt:|952ddc71d9ecf72fc84c7ff909a844d4,bb52453f1bea1dbf59e0659c3928abce": [
-    "wenn ein bereits bestrafter spieler sich zusätzlich wegen unsportlichen verhaltens schuldig machte und deshalb eine weitere strafe wegen \"unsportlichem verhalten\" erhält, wird diese weitere kleine strafe durch einen mitspieler verbüßt."
-  ],
   "eine kleine strafe für \"unsportliches verhalten\" sowie eine spieldauer-disziplinarstrafe wird gegen einen spieler verhängt, der aus protest gegen eine entscheidung eines offiziellen seinen stock oder einen teil davon oder einen anderen ausrüstungsgegenstand oder einen gegenstand außerhalb des spielfeldes wirft.richtig?": [
-    "ja"
-  ],
-  "eine kleine strafe wegen spielverzögerung wird ausgesprochen gegen jeden spieler, einschliesslich des torhüters, welcher den puck festhält, unspielbar macht oder in einer art und weise mit seinem stock, seinen schlittschuhen oder seinem körper spielt, sodass ein spielunterbruch absichtlich herbeigeführtwird.richtig?|a53eec3a1adeb509207f394f0e0543ff": [
-    "ja"
-  ],
-  "eine kleine strafe wegen spielverzögerung wird ausgesprochen gegen jeden spieler, einschliesslich des torhüters, welcher den puck festhält, unspielbar macht oder in einer art und weise mit seinem stock, seinen schlittschuhen oder seinem körper spielt, sodass ein spielunterbruch absichtlich herbeigeführtwird.richtig?|de8c636776446ce478b54253ac2859da": [
     "ja"
   ],
   "eine kleine strafe wegen spielverzögerung wird ausgesprochen, wenn...": [
@@ -652,12 +563,6 @@
   ],
   "einen torhüter, der sich in seinem torraum befindet und absichtlich auf den puck fällt oder diesen unter seinem körper begräbt, oder welcher den puck gegen irgendeinen teil des tores blockiert oder darauf platziert, um einen spielunterbruch herbeizuführen, erhält eine kleine strafe wegen spielverzögerung.": [
     "ja"
-  ],
-  "einen torhüter, der sich in seinem torraum befindet und absichtlich auf den puck fällt oder diesen unter seinem körper begräbt, oder welcher den puck gegen irgendeinen teil des tores blockiert oder darauf platziert, um einen spielunterbruch herbeizuführen, erhält eine kleine strafe wegen spielverzögerung.diese kleine strafe erhält er auch, wenn er tatsächlich von einem gegenspieler massiv bedrängt wird..|8a65a706afccb85a0666426a5de94a14": [
-    "ja"
-  ],
-  "einen torhüter, der sich in seinem torraum befindet und absichtlich auf den puck fällt oder diesen unter seinem körper begräbt, oder welcher den puck gegen irgendeinen teil des tores blockiert oder darauf platziert, um einen spielunterbruch herbeizuführen, erhält eine kleine strafe wegen spielverzögerung.diese kleine strafe erhält er auch, wenn er tatsächlich von einem gegenspieler massiv bedrängt wird..|8e01b154e5f8dee1e17414c65cf143bf": [
-    "nein"
   ],
   "einer der schiedsrichter muss den puck zu beginn eines jedes drittels einwerfen. die linienrichter sind für alle anderen \"anspiele\" verantwortlich.richtig?": [
     "ja"
@@ -770,19 +675,7 @@
   "in demselben spielunterbruch werden zwei (2) kleine strafen gegen den torhüter team b (stockschlag und roughing) sowie eine (1) kleine strafe gegen den gegenspieler a 12 (roughing) verhängt, woraus eine 4-gegen-5-unterzahl für team b entsteht. die strafen gegen den th werden wir folgt verwirklicht:": [
     "ein feldspieler „vom eis“ sitzt die „zusammenfallende“ kleine strafe für den th ab. für die kleine strafe, die übrig bleibt, kann der coach irgendeinen feldspieler seines teams benennen, der diese für den th absitzt"
   ],
-  "in der neutralen zone springt der puck nach einer stock-an-stock-aktion nach oben in die luft. der spieler b #4 schlägt in der folge den puck mit der hand aus dem spielfeld. der ref beurteilt das als absichtliche aktion des spielers b #4. er...|74b9615d096d8c3e592971214ad8c8b8": [
-    "verhängt eine kleine strafe gegen b #4 wegen spielverzögerung"
-  ],
-  "in der neutralen zone springt der puck nach einer stock-an-stock-aktion nach oben in die luft. der spieler b #4 schlägt in der folge den puck mit der hand aus dem spielfeld. der ref beurteilt das als absichtliche aktion des spielers b #4. er...|fca711b983907a5eee0d1621527a049b": [
-    "verhängt eine kleine strafe gegen b #4 wegen spielverzögerung"
-  ],
   "in einem spielunterbruch wegen icings, darf das „nicht-icing-team“ die auszeit verlangen.richtig?": [
-    "ja"
-  ],
-  "in einem spielunterbruch wegen icings, ist ein verlangen auf auszeit für beide teams ausgeschlossen.richtig?|083fd5c03055d111ceb1736eae852657": [
-    "nein"
-  ],
-  "in einem spielunterbruch wegen icings, ist ein verlangen auf auszeit für beide teams ausgeschlossen.richtig?|bd49d5a8657b5a0aeb8ceb5060c96d77": [
     "ja"
   ],
   "in einem zweikampf zieht b7 seinem gegner dessen helm vom kopf.welche strafe erhält b7 für dieses vergehen?": [
@@ -832,18 +725,6 @@
   ],
   "kein spieler darf seinen helm abnehmen, bevor er sich auf einen kampf einlässt. sollte er dies doch tun, erhält er eine kleine strafe für \"unsportliches verhalten\". helme, die im verlauf und als folge der auseinandersetzung runterfallen, haben für keinen der beiden spieler eine strafe zur folge.": [
     "true"
-  ],
-  "kommt es bei ausführung des penaltyschusses dazu, dass der penaltyschütze auf seinem weg in richtung tor den puck verliert, darf er umkehren, um den puck hinter sich wieder einzusammeln und den ps fortzusetzen.|0d27a64bc9e1eea1e442b2b47833204b": [
-    "das ist regelkonform und somit zulässig, solange der puck hinter ihm noch nicht zum kompletten stillstand gekommen ist"
-  ],
-  "kommt es bei ausführung des penaltyschusses dazu, dass der penaltyschütze auf seinem weg in richtung tor den puck verliert, darf er umkehren, um den puck hinter sich wieder einzusammeln und den ps fortzusetzen.|f3aa28480aaef5767709915a8a289827": [
-    "das ist in jedem fall nicht regelkonform und somit nicht zulässig"
-  ],
-  "kommt es zu der situation, dass aus zwei verschiedenen regelverstößen desselben teams zwei penaltyschüsse resultieren, darf dem nicht fehlbaren team in dem darauf folgenden spielunterbruch nur ein ps zugesprochen werden. für den zweiten regelverstoß wird statt des ps die entsprechende strafe verhängt.richtig?|6e0f004c54cbf3b12b4d17f575814bfb": [
-    "nein"
-  ],
-  "kommt es zu der situation, dass aus zwei verschiedenen regelverstößen desselben teams zwei penaltyschüsse resultieren, darf dem nicht fehlbaren team in dem darauf folgenden spielunterbruch nur ein ps zugesprochen werden. für den zweiten regelverstoß wird statt des ps die entsprechende strafe verhängt.richtig?|964142741a4e6417e9609884d839ec98": [
-    "nein"
   ],
   "kommt es zu der situation, dass aus zwei verschiedenen regelverstößen desselben teams zwei penaltyschüsse resultieren, werden dem nicht fehlbaren team in dem darauf folgenden spielunterbruch tatsächlich zwei penaltyschüsse zugesprochen.richtig?": [
     "ja"
@@ -896,18 +777,6 @@
   ],
   "mittelstürmer a16 wurde zuvor am anspiel vom linienrichter verwarnt. diesmal stellt sich a16 für das folgende anspiel auf und gerade als der gegner sich dem anspielpunkt nähert, schlägt a16 absichtlich nach dem arm des lp, offensichtlich verärgert darüber, dass der lp den spieler zuvor beim anspiel verwarnt hat. wie sollte der sr vorgehen?": [
     "der spieler a16 sollte sofort mit einer spieldauerdisziplinarstrafe belegt werden."
-  ],
-  "nach beschwerde des kapitäns team a stellt der schiedsrichter fest, dass der gegnerische spieler b #7die innenfläche seines handschuhs entfernt hat und somit in der lage ist, seine bloße hand einsetzen zu können. hierauf ...|118d258f7554635732097a51d197d039": [
-    "verhängt der ref gegen b #7 eine kleine strafe wegen unkorrekter ausrüstung"
-  ],
-  "nach beschwerde des kapitäns team a stellt der schiedsrichter fest, dass der gegnerische spieler b #7die innenfläche seines handschuhs entfernt hat und somit in der lage ist, seine bloße hand einsetzen zu können. hierauf ...|990531160f5c827a3dfc73d981749079": [
-    "verwarnt der ref den spieler b #7 mit gleichzeitigem hinweis, dass er im wiederholungsfall eine kleine strafe gegen ihn verhängen werde"
-  ],
-  "nach beschwerde des kapitäns team a stellt der schiedsrichter fest, dass die innenfläche des handschuhs des gegnerische spieler b #7 weitgehend intakt ist und ihn nicht in die lage versetzt, seine bloße hand einsetzen zu können.hierauf ...|78088e22814538126c619d52073244f3": [
-    "verhängt der ref gegen den kapitän team a eine kleine strafe"
-  ],
-  "nach beschwerde des kapitäns team a stellt der schiedsrichter fest, dass die innenfläche des handschuhs des gegnerische spieler b #7 weitgehend intakt ist und ihn nicht in die lage versetzt, seine bloße hand einsetzen zu können.hierauf ...|a75c8c2dfac23c2b91b68c46c503ff3b": [
-    "verhängt der ref gegen team a eine kleine bankstrafe"
   ],
   "nach einer ausdrücklichen regel kann bei ungewöhnlichen verzögerungen (z. b. schutzglas gebrochen) die drittelpause vorgezogen werden.ab welcher restlichen spielzeit des drittels greift diese regel?": [
     "ab restzeit 10 minuten"
@@ -1006,18 +875,6 @@
   ],
   "spielzeit 57:00. gegen spieler b #3 zeigt der ref eine kleine strafe wegen stockschlags an. als sein team immer mehr unter druck gerät, setzt b #3 „noch einen drauf“ und verschiebt absichtlich das eigene tor aus der verankerung. der ref": [
     "verhängt gegen b #3 eine kleine strafe wegen stockschlags und zusätzlich einen penaltyschuss für team a"
-  ],
-  "spielzeit 58:02. team a spielt in einer 4-gegen-3-überzahl. für team b laufen noch zwei kleine strafen, mit jeweiliger restzeit von 01:30 minuten. in dieser situation verschiebt der verteidigende spieler b #7 absichtlich das tor aus der regulären position. der ref|16447ad3529a3c54fc012f6ac99d20b3": [
-    "verhängt gegen b #7 eine kleine strafe wegen spielverzögerung"
-  ],
-  "spielzeit 58:02. team a spielt in einer 4-gegen-3-überzahl. für team b laufen noch zwei kleine strafen, mit jeweiliger restzeit von 01:30 minuten. in dieser situation verschiebt der verteidigende spieler b #7 absichtlich das tor aus der regulären position. der ref|1eb5803428d7ce1b67df4bd5396df8ef": [
-    "spricht team a einen penaltyschuss zu"
-  ],
-  "spuckt ein spieler einen gegenspieler an, so hat der schiedsrichter welche strafe zu verhängen?|96bc9ad714823fc479db3f75e5bae2a8": [
-    "spieldauer-disziplinarstrafe"
-  ],
-  "spuckt ein spieler einen gegenspieler an, so hat der schiedsrichter welche strafe zu verhängen?|f4ef033af6864ad9f74cf4ea51993082": [
-    "spieldauer-disziplinarstrafe"
   ],
   "stellt der schiedsrichter fest, dass ein spieler den ellbogenschutz nicht unter sondern über dem spielertrikot trägt": [
     "verwarnt er diesen spieler mit gleichzeitigem hinweis, dass er im wiederholungsfall eine kleine strafe wegen unkorrekter ausrüstung gegen ihn verhängen wird"
@@ -1118,12 +975,6 @@
   "vom linesman in der nz nahe der blauen linie prallt der puck unglücklich ab und wird auf diese weise ins tor abgelenkt.an welchem anspielort wird das folgende anspiel durchgeführt?": [
     "am nächstgelegenen anspielpunkt an der blauen linie"
   ],
-  "vom ref unmittelbar neben dem tor prallt der puck ab in das tor ab. das tor ist deshalb nicht gültig und wird annulliert.an welchem anspielort wird das folgende anspiel durchgeführt?|4ef5e6f8d791612dc5b62dab0d9d9470": [
-    "am anspielpunkt in der ez, nächstgelegen dem ort des „abprallers“"
-  ],
-  "vom ref unmittelbar neben dem tor prallt der puck ab in das tor ab. das tor ist deshalb nicht gültig und wird annulliert.an welchem anspielort wird das folgende anspiel durchgeführt?|affef76650b698f719f830ae1d2c5d87": [
-    "am anspielpunkt in der ez, nächstgelegen dem ort des „abprallers“"
-  ],
   "wegen checks mit dem stock verhängen die schiedsrichter eine große strafe. sie machen von ihrem ermessen gebrauch und verzichten auf die zusätzliche spd.richtig?": [
     "nein"
   ],
@@ -1157,12 +1008,6 @@
   "weil der th team a bei der abwehr des schusses sein tor unabsichtlich aus der verankerung brachte, wurde das spiel unterbrochen. team a verlangt in diesem unterbruch die auszeit.": [
     "der ref lehnt das verlangen von team a ab"
   ],
-  "weil der th team a bei der abwehr des schusses sein tor unabsichtlich aus der verankerung brachte, wurde das spiel unterbrochen. team b verlangt in diesem unterbruch die auszeit.|22cfe8c20507d1b702477e2488df19d8": [
-    "der ref gewährt team b die auszeit"
-  ],
-  "weil der th team a bei der abwehr des schusses sein tor unabsichtlich aus der verankerung brachte, wurde das spiel unterbrochen. team b verlangt in diesem unterbruch die auszeit.|57e17cc49dd9f50f2ce5096493df7324": [
-    "der ref lehnt das verlangen von team b ab"
-  ],
   "weil der th team a seinen stock verloren hatte, übergab der verteidigende spieler a7 seinen spielerstock an den th. kurz darauf bricht der spielerstock, als der th einen schuss abwehrte. der th setzt die verteidigung mit dem gebrochenen spielerstock fort.": [
     "der ref stuft diese situation als legal ein und lässt das spiel weiterlaufen"
   ],
@@ -1192,23 +1037,6 @@
   "welche der aufgelisteten strafen sieht die regel für den versuch eines kopfstoßes vor?": [
     "doppelte kleine strafe"
   ],
-  "welche der folgenden behauptung sind regelkonform:|42c2f472fbd14735479da5fc11e59f1e,4b5cf4f4b47460e16e17ef6e0a59aec8,c9658619dea75ebfc9096998eda899f2": [
-    "wirft ein bestrafter spieler seinen stock über das schutzglas der strafbank, um auf diese weise einen mitspieler, dessen stock gebrochen ist, mit seinem stock zu versorgen, wird gegen sein team eine bankstrafe wegen werfen des stocks verhängt",
-    "der th darf mit seinem th-stock, der gebrochen ist, die verteidigung seines tores fortsetzen"
-  ],
-  "welche der folgenden behauptung sind regelkonform:|79c28393ff888db611b46f480a0406f9,98b2a2517490db1d4a9b40d0afebbb80,9ceea618c612182516d142ee701a64c4": [
-    "verliert der th seinen stock, darf ihm ein mitspieler seinen spielerstock übergeben, mit welchem der th die verteidigung seines tores fortsetzt",
-    "es ist erlaubt, dem th den verlorenen, intakten th-stock entlang des eises zuzuschieben/zuzuschießen, solange das laufende spiel nicht beeinflusst wird",
-    "selbst wenn das laufende spiel nicht beeinflusst wird, ist es nicht zulässig, einen intakten spielerdtock einem mitspieler entlang des eises zuzuschieben/zuzuschießen",
-    "versorgt ein mitspieler den th mit dessen th-stock, ist es zulässig, dass sich dieser mitspieler am laufenden spiel beteiligen kann, vorausgesetzt, er lässt zuvor den th-stock fallen"
-  ],
-  "welche der folgenden behauptung sind regelkonform:|cab642e32cc722b61f0e9a333633ed76,f7173d1ffffb95bed8d318d3f6a75fd4": [
-    "der th darf mit seinem th-stock, der gebrochen ist, die verteidigung seines tores fortsetzen",
-    "wirft ein bestrafter spieler seinen stock über das schutzglas der strafbank, um auf diese weise einen mitspieler, dessen stock gebrochen ist, mit seinem stock zu versorgen, wird gegen sein team eine bankstrafe wegen werfen des stocks verhängt"
-  ],
-  "welche der folgenden behauptung sind regelkonform:|cfb61cb9901eb27817f2e83271ca18bf": [
-    "verliert der th seinen stock, ist es zulässig, dass ein mitspieler den intakten th-stock seinem th „zuschießt“, solange diese aktion keinen einfluss auf das spiel hat"
-  ],
   "welche der genannten regeln erlaubt die verhängung außschlielich einer großen strafe ohne einer zusätzlichen spd?": [
     "check gegen die bande (boarding)",
     "ellbogencheck (elbowing)",
@@ -1221,24 +1049,6 @@
   "welche dieser strafen droht die regel für versuchten bzw. vollendeten stockendenstoss (nach ermessen des sr) an?": [
     "doppelte kleine strafe",
     "große strafe mit zwingender spieldauer-disziplinarstrafe"
-  ],
-  "welche dieser strafen droht die regel für vollendeten stockstich an?|2a977b155ed6ad9dc2fcf67e8b99bffe": [
-    "große strafe mit zwingender spd"
-  ],
-  "welche dieser strafen droht die regel für vollendeten stockstich an?|ed2bb40699c3472cad9b0005e2238cca": [
-    "große strafe mit zusätzlicher spd nach ermessen des refs"
-  ],
-  "welche fouls haben eine doppelte kleine strafe zur folge?|258430e08ceae412bc08ef0af28032d8,53d80fb1d46edfd8229e3c62fda594fc,627cc15a7c25e7698dd0f3bfd4fee510,978745492b50445b0c0967ec97fde3e4": [
-    "versuchter stockstich",
-    "versuchter kopfstoß",
-    "fahrlässig hoher stock mit verletzungsfolge",
-    "versuchter stockendenstoß"
-  ],
-  "welche fouls haben eine doppelte kleine strafe zur folge?|4dacb09a039496023ef640d696c4bade,90fec821ded6fec7b20f9cee50d5a823,fd8cf223bda298020c1717a22824119b,fe33a497d8dad016cb5b7e6880e41464": [
-    "fahrlässig hoher stock mit verletzungsfolge",
-    "versuchter stockendenstoß",
-    "versuchter kopfstoß",
-    "versuchter stockstich"
   ],
   "welche strafe sieht die regel für einen faustkampf auf dem eis außerhalb der spielzeit (z. b. nach ende eines drittels oder nach ende des spiels) vor?": [
     "eine große strafe plus zwingende spd"
@@ -1304,12 +1114,6 @@
   "wenn in einem spielunterbruch eine große und eine kleine strafe gegen verschiedene spieler desselben teams verhängt werden, welches in diesem moment in 4-gegen-5-unterzahl spielt, richtet sich die strafenverwirklichung nach der reihenfolge der begangenen regelverstöße.richtig?": [
     "nein"
   ],
-  "werden einem team in demselben spielunterbruch zwei penaltyschüsse zugesprochen, kommt der zweite penaltyschuss nicht zur ausführung, wenn der erste ps mit einem tor beendet wurde. stattdessen verbüßt der fehlbare feldspieler die entsprechende strafe für den von ihm begangenen regelverstoß.richtig?|21220e9820e3f8ba04ec54fee200ab02": [
-    "nein"
-  ],
-  "werden einem team in demselben spielunterbruch zwei penaltyschüsse zugesprochen, kommt der zweite penaltyschuss nicht zur ausführung, wenn der erste ps mit einem tor beendet wurde. stattdessen verbüßt der fehlbare feldspieler die entsprechende strafe für den von ihm begangenen regelverstoß.richtig?|5be1372d61bb49f6c88fa78ffb2486b0": [
-    "ja"
-  ],
   "werden einem team in demselben spielunterbruch zwei penaltyschüsse zugesprochen, kommt der zweite ps nur dann zur ausführung, wenn der erste ps ohne tor beendet wurde.richtig?": [
     "ja"
   ],
@@ -1368,27 +1172,6 @@
   "wird einer mannschaft, ein «überzahlspiel» zugesprochen entscheidet die lp auf welcher seite in der endzone das nächste «anspiel» stattfindet.": [
     "nein"
   ],
-  "wird gegen den torhüter eine disziplinarstrafe verhängt, ist diese|b0adc817ad92b14b746ad5fbd68513b7": [
-    "... von einem feldspieler dieses teams abzusitzen, der sich auf dem eis befand, als der th den regelverstoß beging"
-  ],
-  "wird gegen den torhüter eine disziplinarstrafe verhängt, ist diese|e04abd5fa2a24f53158beec7034f4e2e": [
-    "... von irgendeinem feldspieler dieses teams abzusitzen"
-  ],
-  "wird gegen den torhüter eine disziplinarstrafe verhängt, wird diese wie folgt verwirklicht:|16743c135ed448b57f7f43f85f33386d": [
-    "der th muss für die dauer der diszi gegen den zweiten th ausgewechselt werden. der coach bestimmt über den kapitän irgendeinen feldspieler, der die diszi für den th absitzt"
-  ],
-  "wird gegen den torhüter eine disziplinarstrafe verhängt, wird diese wie folgt verwirklicht:|23fb2da039a96680934ea6ce7381485a": [
-    "der th nimmt weiter am spiel teil. der coach bestimmt über den kapitän einen feldspieler, welcher im moment des regelverstoßes auf dem eis war, der die diszi für den th absitzt"
-  ],
-  "wird gegen den torhüter eine disziplinarstrafe verhängt, wird diese wie folgt verwirklicht:|be84951948eb0f24f8d3eb6aa122fa85": [
-    "der th nimmt weiter am spiel teil. der coach bestimmt über den kapitän einen feldspieler, welcher im moment des regelverstoßes auf dem eis war, der die diszi für den th absitzt"
-  ],
-  "wird gegen den torhüter eine große strafe verhängt, ist diese von einem feldspieler dieses teams abzusitzen, der sich zum zeitpunkt des regelverstoßes auf dem eis befand.richtig?|bbc6206d56102e97a9546c2d003e8ece": [
-    "ja"
-  ],
-  "wird gegen den torhüter eine große strafe verhängt, ist diese von einem feldspieler dieses teams abzusitzen, der sich zum zeitpunkt des regelverstoßes auf dem eis befand.richtig?|dd22eaa3f2daa58d40d6ed177eca1ef0": [
-    "nein"
-  ],
   "wird gegen den torhüter eine große strafe verhängt, ist diese von irgendeinem feldspieler seines teams abzusitzen.richtig?": [
     "nein"
   ],
@@ -1415,12 +1198,6 @@
   ],
   "wird während des penaltyschießens zur ermittlung des gewinners eine disziplinarstrafe gegen th ausgesprochen, verbüßt irgendein feldspieler dieses teams die strafe für den th.richtig?": [
     "nein"
-  ],
-  "wirft der torhüter seinen stock oder anderen gegenstand (z. b. fanghand) absichtlich nach dem penaltyschützen, ist folgendes zu entscheiden:|8da73e0389ee5680d885eea2ad50d904": [
-    "der penaltyschuss muss wiederholt werden"
-  ],
-  "wirft der torhüter seinen stock oder anderen gegenstand (z. b. fanghand) absichtlich nach dem penaltyschützen, ist folgendes zu entscheiden:|b8b83813ba5260c1e742428333292d27": [
-    "auf zugesprochenes tor"
   ],
   "wirft der torhüter seinen stock oder anderen gegenstand (z. b. fanghand) absichtlich nach dem penaltyschützen, wird gegen den th eine kleine strafe wegen werfen des stocks verhängt und der ps wiederholt. richtig?": [
     "nein"
@@ -1452,15 +1229,6 @@
   ],
   "während einer auseinandersetzung verlässt der torhüter seinen torraum in einer weise, die der ref für strafwürdig erachtet. er verhängt deshalb eine kleine strafe mit automatischer disziplinarstrafe gegen den th.richtig?": [
     "nein"
-  ],
-  "während einer spielunterbrechnung darf sich der torhüter nur mit erlaubnis des schiedsrichters zu seiner spielerbank begeben,|27717a467efe9a5bbd572d9dbca4494c,87dc440d073ec94acc5d1bc9f12a3d9e,96c2559039951bd37de37676b7d2f85b": [
-    "... um einen ersatzstock oder eine ausrüstung zu erhalten, oder um diese zu reparieren zu lassen",
-    "... um sofort (ohne verzögerung) durch den ersatztorhüter ersetzt werden oder die mannschaft erhält eine kleine bankstrafe",
-    "... um sich verarzten zu lassen"
-  ],
-  "während einer spielunterbrechnung darf sich der torhüter nur mit erlaubnis des schiedsrichters zu seiner spielerbank begeben,|87dc440d073ec94acc5d1bc9f12a3d9e,96c2559039951bd37de37676b7d2f85b,fcbca438dc45c0d67b9184bc0e6528a6": [
-    "... um sofort (ohne verzögerung) durch den ersatztorhüter ersetzt werden oder er erhält eine kleine strafe",
-    "... um sofort (ohne verzögerung) durch den ersatztorhüter ersetzt werden oder die mannschaft erhält eine kleine bankstrafe"
   ],
   "während eines legalen kampfes um den puck geht ein schläger eines spielers zu bruch, wobei keine strafe gerechtfertigt ist, ist der spieler aber anderer meinung und schreit den schiedsrichter an. als er den zerbrochenen schläger wegwirft, wirft er ihn über das schutzglas auf die zuschauerränge. wie lautet die entscheidung?": [
     "der spieler erhält eine kleine strafe wegen unsportlichen verhaltens und eine spieldauerdisziplinarstrafe."
@@ -1519,5 +1287,52 @@
   ],
   "zwei (2) kleine strafen gegen den torhüter team b (stockschlag und roughing) sowie eine (1) kleine strafe gegen den gegenspieler a 12 (roughing) führen zu einer 4-gegen-5-unterzahl für team b.in diesem fall sitzt ein feldspieler „vom eis“ die „zusammenfallende“ kleine strafe für den th ab. für die kleine strafe, die übrig bleibt, kann der coach irgendeinen feldspieler seines teams benennen, der diese für den th absitzt.richtig?": [
     "ja"
+  ],
+  "wird gegen den torhüter eine disziplinarstrafe verhängt, ist diese": [
+    "... von einem feldspieler dieses teams abzusitzen, der sich auf dem eis befand, als der th den regelverstoß beging"
+  ],
+  "wird gegen den torhüter eine disziplinarstrafe verhängt, wird diese wie folgt verwirklicht:": [
+    "der th nimmt weiter am spiel teil. der coach bestimmt über den kapitän einen feldspieler, welcher im moment des regelverstoßes auf dem eis war, der die diszi für den th absitzt"
+  ],
+  "während einer spielunterbrechnung darf sich der torhüter nur mit erlaubnis des schiedsrichters zu seiner spielerbank begeben,": [
+    "... um einen ersatzstock oder eine ausrüstung zu erhalten, oder um diese zu reparieren zu lassen",
+    "... um sofort (ohne verzögerung) durch den ersatztorhüter ersetzt werden oder die mannschaft erhält eine kleine bankstrafe",
+    "... um sich verarzten zu lassen"
+  ],
+  "wird gegen den torhüter eine große strafe verhängt, ist diese von einem feldspieler dieses teams abzusitzen, der sich zum zeitpunkt des regelverstoßes auf dem eis befand.richtig?": [
+    "ja"
+  ],
+  "als das verteidigende team b in der 25. spielminute unter druck gerät, verschiebt der verteidigende spieler b #5 das tor aus seiner regulären position. eine unmittelbare torchance bestand nicht. der ref beurteilt die aktion als absichtlich herbeigeführt. er spricht deshalb team a einen penaltyschuss zu.richtig?": [
+    "nein"
+  ],
+  "einen torhüter, der sich in seinem torraum befindet und absichtlich auf den puck fällt oder diesen unter seinem körper begräbt, oder welcher den puck gegen irgendeinen teil des tores blockiert oder darauf platziert, um einen spielunterbruch herbeizuführen, erhält eine kleine strafe wegen spielverzögerung.diese kleine strafe erhält er auch, wenn er tatsächlich von einem gegenspieler massiv bedrängt wird..": [
+    "nein"
+  ],
+  "begeht das team ohne puckbesitz einen regelverstoß, der eine - kleine strafe- kleine bankstrafe- große strafe- disziplinarstrafe- spieldauer-disziplinarstrafe zur folge hat, hebt der ref seinen arm und zeigt so an, dass er die entsprechende strafe aussprechen wird. erlangt das team, gegen welches die strafe angezeigt wird kontrolle über den puck, pfeift der ref ab und verhängt die entsprechende strafe gegen den spieler bzw. gegen das fehlbare team.richtig?": [
+    "ja"
+  ],
+  "die regel sieht für einen check mit dem knie (kneeing) vor, dass eine große strafe zwingend mit einer zusätzlichen spd verbunden werden muss.richtig?": [
+    "ja"
+  ],
+  "eine kleine strafe wegen spielverzögerung wird ausgesprochen gegen jeden spieler, einschliesslich des torhüters, welcher den puck festhält, unspielbar macht oder in einer art und weise mit seinem stock, seinen schlittschuhen oder seinem körper spielt, sodass ein spielunterbruch absichtlich herbeigeführtwird.richtig?": [
+    "ja"
+  ],
+  "in der neutralen zone springt der puck nach einer stock-an-stock-aktion nach oben in die luft. der spieler b #4 schlägt in der folge den puck mit der hand aus dem spielfeld. der ref beurteilt das als absichtliche aktion des spielers b #4. er...": [
+    "verhängt eine kleine strafe gegen b #4 wegen spielverzögerung"
+  ],
+  "kommt es zu der situation, dass aus zwei verschiedenen regelverstößen desselben teams zwei penaltyschüsse resultieren, darf dem nicht fehlbaren team in dem darauf folgenden spielunterbruch nur ein ps zugesprochen werden. für den zweiten regelverstoß wird statt des ps die entsprechende strafe verhängt.richtig?": [
+    "nein"
+  ],
+  "spuckt ein spieler einen gegenspieler an, so hat der schiedsrichter welche strafe zu verhängen?": [
+    "spieldauer-disziplinarstrafe"
+  ],
+  "vom ref unmittelbar neben dem tor prallt der puck ab in das tor ab. das tor ist deshalb nicht gültig und wird annulliert.an welchem anspielort wird das folgende anspiel durchgeführt?": [
+    "am anspielpunkt in der ez, nächstgelegen dem ort des „abprallers“"
+  ],
+  "welche fouls haben eine doppelte kleine strafe zur folge?": [
+    "versuchter stockstich",
+    "versuchter kopfstoß",
+    "fahrlässig hoher stock mit verletzungsfolge",
+    "versuchter stockendenstoß"
   ]
 }
