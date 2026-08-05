@@ -9,7 +9,6 @@ let overlayEl      = null;
 let overlayStatus  = null;
 let overlayCount   = null;
 let learnedThisSession = false;
-let lastFilledQuestion = '';
 let watchDebounce  = null;
 
 // ─── Storage ──────────────────────────────────────────────────────────────────
@@ -175,6 +174,13 @@ function createOverlay() {
   });
 
   document.getElementById('cm-autofill-btn').addEventListener('click', fillCurrentQuestion);
+
+  document.addEventListener('keydown', e => {
+    if (e.key.toLowerCase() !== 'f' || e.altKey || e.ctrlKey || e.metaKey) return;
+    const t = e.target;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+    fillCurrentQuestion();
+  });
   document.getElementById('cm-learn-btn').addEventListener('click', scrollAndLearn);
   document.getElementById('cm-export-btn').addEventListener('click', exportAnswers);
   document.getElementById('cm-export-html-btn').addEventListener('click', exportAnswersHTML);
@@ -555,18 +561,13 @@ function startMainObserver() {
 
       if (Object.keys(knownAnswers).length === 0) return;
 
-      getQuestionLists().forEach(list => {
+      const hasUnfilled = getQuestionLists().some(list => {
         const alreadyChecked = list.querySelector(
           '.radio-checked, ion-radio[aria-checked="true"], ion-checkbox[aria-checked="true"], .item-checkbox-checked, .item-radio-checked'
         );
-        if (alreadyChecked) return;
-        const qText = getQuestionText(list);
-        if (!qText || qText === lastFilledQuestion) return;
-        if (fillQuestionList(list)) {
-          lastFilledQuestion = qText;
-          setStatus('✅ Antwort eingetragen.');
-        }
+        return !alreadyChecked && findBestMatch(list);
       });
+      if (hasUnfilled) setStatus('💡 Antwort bekannt – F drücken zum Ausfüllen.');
     }, 400);
   });
 
@@ -852,8 +853,7 @@ async function init() {
   } else if (isOnQuizPage()) {
     const total = Object.keys(knownAnswers).length;
     if (total > 0) {
-      setStatus(`💡 ${total} Antworten gespeichert – fülle aus…`);
-      setTimeout(() => { fillCurrentQuestion(); updateOverlay(); }, 1200);
+      setStatus(`💡 ${total} Antworten gespeichert – F drücken zum Ausfüllen.`);
     } else {
       setStatus('📝 Quiz – beantworte die Fragen, Antworten werden gespeichert.');
     }
