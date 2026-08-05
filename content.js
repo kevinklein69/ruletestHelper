@@ -255,31 +255,54 @@ async function scrollAndLearn() {
   setStatus(`✅ ${total} gespeichert — ${fromResults} von Ergebnisseite, ${fromPending} aus Quiz-Tracking.`);
 }
 
+// Reads the tick/cross markers ClassMarker renders on an answered question and returns the
+// texts of the answer options that are confirmed correct.
+//
+// `.circular-tick` = the option you selected, marked correct.
+// `.circular-tick-holo` = a correct option you did NOT select (still counts!) — easy to miss,
+// this is what made question 1 ("...große strafe zwingend...") look 2-answer when it's really
+// 4-answer: two of the four correct options only show the "holo" (outline) tick because they
+// weren't picked.
+// `.circular-x` = selected but wrong.
+//
+// `trustSelectedFallback` controls whether a selected item with NEITHER icon should be assumed
+// correct — only safe when the whole page never renders tick/cross markers at all (see callers).
+function extractCorrectAnswers(list, trustSelectedFallback) {
+  const correctAnswers = [];
+  getAnswerItems(list).forEach(item => {
+    const hasTick    = item.querySelector('.circular-tick, .circular-tick-holo');
+    const hasX       = item.querySelector('.circular-x');
+    const isSelected = item.classList.contains('item-radio-checked') ||
+                       item.classList.contains('item-checkbox-checked') ||
+                       item.classList.contains('checkbox-checked');
+
+    // Tick (selected or holo/unselected) without X = definitively correct answer
+    if (hasTick && !hasX) {
+      const t = getAnswerText(item);
+      if (t && !correctAnswers.includes(t)) correctAnswers.push(t);
+    }
+    // Selected with no markers at all = only trust this if the page never shows markers.
+    // Otherwise a selected-but-actually-wrong answer (marker just not rendered/found) would get
+    // silently learned as "correct" — this previously poisoned stored data.
+    else if (isSelected && !hasX && !hasTick && trustSelectedFallback) {
+      const t = getAnswerText(item);
+      if (t && !correctAnswers.includes(t)) correctAnswers.push(t);
+    }
+  });
+  return correctAnswers;
+}
+
 function learnFromResults() {
   let learned = 0;
 
+  // Whether this results page renders explicit tick/cross markers at all. Computed once so we
+  // don't have to guess per-question. If markers are used ANYWHERE on the page, a selected item
+  // with no tick is untrustworthy — see extractCorrectAnswers.
+  const pageUsesMarkers = !!document.querySelector('.circular-tick, .circular-tick-holo, .circular-x');
+
   getQuestionLists().forEach(list => {
     const qText = getQuestionText(list);
-    const correctAnswers = [];
-
-    getAnswerItems(list).forEach(item => {
-      const hasTick    = item.querySelector('.circular-tick, .circular-tick-holo');
-      const hasX       = item.querySelector('.circular-x');
-      const isSelected = item.classList.contains('item-radio-checked') ||
-                         item.classList.contains('item-checkbox-checked') ||
-                         item.classList.contains('checkbox-checked');
-
-      // Tick without X = definitively correct answer
-      if (hasTick && !hasX) {
-        const t = getAnswerText(item);
-        if (t && !correctAnswers.includes(t)) correctAnswers.push(t);
-      }
-      // Selected with no markers = user answered this correctly
-      else if (isSelected && !hasX && !hasTick) {
-        const t = getAnswerText(item);
-        if (t && !correctAnswers.includes(t)) correctAnswers.push(t);
-      }
-    });
+    const correctAnswers = extractCorrectAnswers(list, !pageUsesMarkers);
 
     if (correctAnswers.length > 0) {
       const qKey = getQuestionKey(list);
@@ -293,6 +316,43 @@ function learnFromResults() {
   learnedThisSession = true;
   saveAnswers();
   return learned;
+}
+
+// Learn from ClassMarker's immediate per-question feedback ("Übungsmodus" — you answer one
+// question, click "Weiter", and it shows tick/cross icons + a "Bewertung" box right there,
+// still on the /test/ URL). isOnResultPage() only fires for the final /results/ page, so this
+// richer, more-immediate feedback was previously never learned from at all — every answer
+// captured during practice mode came only from the raw click-tracking in startMainObserver,
+// which has no way to know if a selection was actually correct.
+const learnedFeedbackKeys = new Set();
+
+function learnFromVisibleFeedback() {
+  let learned = 0;
+
+  getQuestionLists().forEach(list => {
+    const hasFeedback = list.querySelector('.circular-tick, .circular-tick-holo, .circular-x');
+    if (!hasFeedback) return;
+
+    const qKey = getQuestionKey(list);
+    if (!qKey || learnedFeedbackKeys.has(qKey)) return;
+
+    // Feedback icons are present on this exact list, so trust them fully (no fallback needed).
+    const correctAnswers = extractCorrectAnswers(list, false);
+    if (correctAnswers.length === 0) return;
+
+    const qText = getQuestionText(list);
+    if (qKey !== qText) delete knownAnswers[qText];
+    knownAnswers[qKey] = correctAnswers;
+    learnedFeedbackKeys.add(qKey);
+    learned++;
+    console.log('[CM Helper] Sofort-Feedback gelernt:', qKey.substring(0, 60), '→', correctAnswers);
+  });
+
+  if (learned > 0) {
+    saveAnswers();
+    updateOverlay();
+    setStatus(`✅ ${learned} Frage(n) aus Sofort-Feedback gelernt.`);
+  }
 }
 
 // Merge pending (quiz-time selections) into knownAnswers for questions
@@ -350,25 +410,22 @@ function findBestMatch(listEl) {
   // Exact text-only match (backward compat with pre-fingerprint stored data)
   if (knownAnswers[qText]) return knownAnswers[qText];
 
-  // Near-text fallback — strips fingerprint (either legacy "|" or "\x01" format) from stored
-  // keys before comparing. This only fires when we have NO exact match for the answer options
-  // actually shown right now, i.e. this specific question render was never learned before.
+  // Exact-text fallback across fingerprinted keys — strips a stored key's fingerprint suffix
+  // (either legacy "|" or "\x01" format) before comparing, but still requires the FULL question
+  // text to match exactly. This only ever picks up a *different rendering* of the exact same
+  // question (e.g. options shown in a different order), never a different-but-similarly-worded
+  // one.
   //
-  // ClassMarker reuses identical question text for genuinely different questions (different
-  // correct answers depending on which option pool is shown — see getQuestionKey). If several
-  // stored entries share this question's text but disagree on the answer set, we cannot tell
-  // which one belongs to the variant currently on screen. Guessing one of them risks ticking
-  // wrong/incomplete boxes, which is worse than leaving the question unanswered. So: only
-  // auto-fill from this fallback when every matching stored entry agrees on the same answer
-  // set (harmless — same question, just a legacy/slightly different key format) or there is
-  // exactly one candidate. If they disagree, return null and let the user answer manually.
+  // We deliberately do NOT do fuzzy/substring/"near enough" text matching here. The exam
+  // intentionally includes near-duplicate "trap" questions — same topic, a couple of words
+  // swapped, different correct answer, specifically designed to catch careless mistakes. A
+  // "close enough" match could silently apply the wrong trap question's answer, and ClassMarker
+  // doesn't let you go back to fix it afterwards. Leaving an unrecognized question unanswered
+  // (so you answer it yourself) is safer than guessing.
   const candidates = [];
   for (const [key, val] of Object.entries(knownAnswers)) {
     const keyText = key.split(/[|\x01]/)[0];
-    const ratio = Math.min(qText.length, keyText.length) / Math.max(qText.length, keyText.length);
-    if (ratio < 0.90) continue;
-    if (!(qText.includes(keyText) || keyText.includes(qText))) continue;
-    candidates.push(val);
+    if (keyText === qText) candidates.push(val);
   }
   if (candidates.length === 0) return null;
 
@@ -491,6 +548,11 @@ function startMainObserver() {
         return;
       }
       if (!isOnQuizPage()) return;
+
+      // Always check for immediate per-question feedback first, even with an empty store —
+      // this is how we bootstrap answers from scratch in practice mode.
+      learnFromVisibleFeedback();
+
       if (Object.keys(knownAnswers).length === 0) return;
 
       getQuestionLists().forEach(list => {
