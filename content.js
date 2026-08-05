@@ -361,14 +361,21 @@ function learnFromVisibleFeedback() {
   }
 }
 
-// Merge pending (quiz-time selections) into knownAnswers for questions
-// correctly answered (not shown on results page, so no tick icon available).
+// Merge pending (quiz-time selections) into knownAnswers for questions not covered by
+// learnFromResults (no tick/cross markers found for them).
+//
+// Only trusted when the results page shows NO grading markers ANYWHERE — same guard as
+// extractCorrectAnswers' trustSelectedFallback. If markers ARE used on this page but just
+// weren't found for one specific question (missed by scroll, render timing, etc.), a raw
+// click is not proof of correctness — silently trusting it previously poisoned stored data
+// with wrong/incomplete answers (e.g. a selected-but-wrong multi-select option).
 function mergePending() {
+  const pageUsesMarkers = !!document.querySelector('.circular-tick, .circular-tick-holo, .circular-x');
   const pendingKeys   = Object.keys(pendingAnswers);
   const knownKeys     = Object.keys(knownAnswers);
   let merged = 0;
 
-  console.log('[CM Helper] Pending keys:', pendingKeys.length, '| Known keys:', knownKeys.length);
+  console.log('[CM Helper] Pending keys:', pendingKeys.length, '| Known keys:', knownKeys.length, '| pageUsesMarkers:', pageUsesMarkers);
 
   pendingKeys.forEach(pKey => {
     const answers = pendingAnswers[pKey];
@@ -377,6 +384,11 @@ function mergePending() {
     // Already stored under the exact key (learnFromResults already handled it)
     if (knownAnswers[pKey]) {
       console.log('[CM Helper] Merge skip (exact key exists):', pKey.substring(0, 50));
+      return;
+    }
+
+    if (pageUsesMarkers) {
+      console.log('[CM Helper] Merge skip (marker page, unverified click):', pKey.substring(0, 50));
       return;
     }
 
