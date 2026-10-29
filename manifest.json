@@ -8,11 +8,12 @@
     "activeTab"
   ],
   "host_permissions": [
-    "https://*.classmarker.com/*"
+    "https://*.classmarker.com/*",
+    "https://eishockey-management.de/*"
   ],
   "content_scripts": [
     {
-      "matches": ["https://*.classmarker.com/*"],
+      "matches": ["https://*.classmarker.com/*", "https://eishockey-management.de/*"],
       "js": ["content.js"],
       "css": ["overlay.css"],
       "run_at": "document_idle"

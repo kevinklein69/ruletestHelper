@@ -1,7 +1,13 @@
 // ClassMarker Eishockey Regeltest Helper - Content Script
 
-const STORAGE_KEY  = 'cm_eishockey_answers';
+// Runs on two sites: ClassMarker and the BEV-Fragenkatalog (eishockey-management.de).
+// Question wording can differ between the two, so each site gets its OWN storage key —
+// import/export/clear/auto-fill only ever touch the store of the site you're on.
+const IS_BEV       = location.hostname.endsWith('eishockey-management.de');
+const STORAGE_KEY  = IS_BEV ? 'bev_fragenkatalog_answers' : 'cm_eishockey_answers';
 const PENDING_KEY  = 'cm_pending_answers';
+const EXPORT_NAME  = IS_BEV ? 'bev-fragenkatalog-antworten' : 'eishockey-antworten';
+const EXPORT_TITLE = IS_BEV ? 'BEV-Fragenkatalog – Antworten' : 'Eishockey Regeltest – Antworten';
 
 let knownAnswers   = {};
 let pendingAnswers = {};   // selected answers during current quiz run
@@ -46,11 +52,18 @@ function clearPending() {
 // ─── Page detection (URL-based, reliable) ────────────────────────────────────
 
 function isOnResultPage() {
+  if (IS_BEV) return false; // BEV gives feedback per question, learned via learnFromVisibleFeedback
   return location.pathname.includes('/results/');
 }
 
 function isOnQuizPage() {
+  if (IS_BEV) return !!document.getElementById('fkFrage');
   return location.pathname.includes('/test/') && !isOnResultPage();
+}
+
+// BEV page script declares `const UEBEN = true` in practice mode (solutions are shown).
+function isBevPracticeMode() {
+  return IS_BEV && [...document.scripts].some(s => /const UEBEN\s*=\s*true\b/.test(s.textContent));
 }
 
 // ─── Text helpers ─────────────────────────────────────────────────────────────
@@ -70,7 +83,7 @@ function getAnswerText(itemEl) {
 
   // Clone and strip icons/index letters before reading text
   const clone = itemEl.cloneNode(true);
-  clone.querySelectorAll('ion-icon, .question-index').forEach(e => e.remove());
+  clone.querySelectorAll('ion-icon, .question-index, .fk-key').forEach(e => e.remove());
 
   const label = clone.querySelector('ion-label, .question-option, .question-content');
   if (label) return normalizeText(label.textContent).replace(/^[a-z]\.\s*/, '');
@@ -91,20 +104,24 @@ function answerMatches(itemText, savedAnswer) {
 // Returns all answer option elements.
 // Both radio and checkbox questions use ion-item as the answer container.
 // .checkbox-options-area is a class INSIDE each ion-item (not a wrapper around them).
+// BEV: <button class="fk-opt" data-key="A"> inside #fkOptionen.
 function getAnswerItems(list) {
-  return Array.from(list.querySelectorAll('ion-item'));
+  return Array.from(list.querySelectorAll(IS_BEV ? 'button.fk-opt' : 'ion-item'));
 }
 
 function getQuestionText(listEl) {
-  const el = listEl.querySelector('.question-text .bbcode, .question-text, ion-list-header .bbcode, ion-list-header');
+  const el = listEl.querySelector(IS_BEV ? '#fkFrage'
+    : '.question-text .bbcode, .question-text, ion-list-header .bbcode, ion-list-header');
   return el ? normalizeText(el.textContent) : '';
 }
 
 // All ion-lists on the page that actually contain a question (have a question text).
 // This is intentionally class-agnostic so that any question type is captured,
 // regardless of what CSS class ClassMarker puts on the ion-list.
+// BEV shows exactly one question at a time inside .fk-card.
 function getQuestionLists() {
-  return Array.from(document.querySelectorAll('ion-list')).filter(l => getQuestionText(l) !== '');
+  const lists = IS_BEV ? document.querySelectorAll('.fk-card') : document.querySelectorAll('ion-list');
+  return Array.from(lists).filter(l => getQuestionText(l) !== '');
 }
 
 // Unique storage key for a question.
@@ -139,7 +156,7 @@ function createOverlay() {
   overlayEl.id = 'cm-helper-overlay';
   overlayEl.innerHTML = `
     <div id="cm-header">
-      <span id="cm-title">🏒 Regeltest Helper</span>
+      <span id="cm-title">🏒 ${IS_BEV ? 'BEV-Fragenkatalog' : 'Regeltest Helper'}</span>
       <button id="cm-toggle">▴</button>
     </div>
     <div id="cm-body">
@@ -148,6 +165,8 @@ function createOverlay() {
       <div id="cm-pending"></div>
       <button id="cm-autofill-btn" style="display:none">▶ Aktuelle Frage ausfüllen</button>
       <button id="cm-learn-btn" style="display:none">📖 Antworten lernen</button>
+      <button id="cm-harvest-btn" style="display:none">🤖 Pool automatisch durchlernen</button>
+      <button id="cm-harvest-all-btn" style="display:none">🤖 Alle Pools durchlernen</button>
       <button id="cm-export-btn">📤 Antworten exportieren (JSON)</button>
       <button id="cm-export-html-btn">📋 Als HTML exportieren</button>
       <button id="cm-export-pdf-btn">📄 Als PDF exportieren (fürs Handy)</button>
@@ -182,6 +201,8 @@ function createOverlay() {
     fillCurrentQuestion();
   });
   document.getElementById('cm-learn-btn').addEventListener('click', scrollAndLearn);
+  document.getElementById('cm-harvest-btn').addEventListener('click', harvestBevPool);
+  document.getElementById('cm-harvest-all-btn').addEventListener('click', startHarvestAll);
   document.getElementById('cm-export-btn').addEventListener('click', exportAnswers);
   document.getElementById('cm-export-html-btn').addEventListener('click', exportAnswersHTML);
   document.getElementById('cm-export-pdf-btn').addEventListener('click', exportAnswersPDF);
@@ -227,6 +248,11 @@ function updateOverlay() {
   const learnBtn    = document.getElementById('cm-learn-btn');
   if (autofillBtn) autofillBtn.style.display = (isOnQuizPage() && total > 0) ? 'block' : 'none';
   if (learnBtn)    learnBtn.style.display    = isOnResultPage() ? 'block' : 'none';
+  const harvestBtn = document.getElementById('cm-harvest-btn');
+  if (harvestBtn)  harvestBtn.style.display  = isBevPracticeMode() ? 'block' : 'none';
+  const harvestAllBtn = document.getElementById('cm-harvest-all-btn');
+  if (harvestAllBtn) harvestAllBtn.style.display =
+    (IS_BEV && document.querySelector('a[title^="Üben"]')) ? 'block' : 'none';
 }
 
 // ─── Learning from results page ───────────────────────────────────────────────
@@ -276,8 +302,9 @@ async function scrollAndLearn() {
 function extractCorrectAnswers(list, trustSelectedFallback) {
   const correctAnswers = [];
   getAnswerItems(list).forEach(item => {
-    const hasTick    = item.querySelector('.circular-tick, .circular-tick-holo');
-    const hasX       = item.querySelector('.circular-x');
+    // BEV marks the option button itself: .correct (right, selected or not) / .wrong
+    const hasTick    = IS_BEV ? item.classList.contains('correct') : item.querySelector('.circular-tick, .circular-tick-holo');
+    const hasX       = IS_BEV ? item.classList.contains('wrong')   : item.querySelector('.circular-x');
     const isSelected = item.classList.contains('item-radio-checked') ||
                        item.classList.contains('item-checkbox-checked') ||
                        item.classList.contains('checkbox-checked');
@@ -336,7 +363,8 @@ function learnFromVisibleFeedback() {
   let learned = 0;
 
   getQuestionLists().forEach(list => {
-    const hasFeedback = list.querySelector('.circular-tick, .circular-tick-holo, .circular-x');
+    const hasFeedback = list.querySelector(IS_BEV ? '.fk-opt.correct'
+      : '.circular-tick, .circular-tick-holo, .circular-x');
     if (!hasFeedback) return;
 
     const qKey = getQuestionKey(list);
@@ -358,6 +386,130 @@ function learnFromVisibleFeedback() {
     saveAnswers();
     updateOverlay();
     setStatus(`✅ ${learned} Frage(n) aus Sofort-Feedback gelernt.`);
+  }
+}
+
+// BEV "Üben" mode: walks through the whole pool — picks option A, "Antwort prüfen", learns the
+// solution the server marks with .correct, "Weiter" — until the result screen shows up.
+// Only allowed in practice mode: in a real test there's no solution shown, so it would just
+// submit A for everything. It still stops if no solution appears within 5s.
+// Note: this counts as answered questions in your BEV-Fragenkatalog statistics.
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const sleepRandom = (minMs, maxMs) => sleep(minMs + Math.random() * (maxMs - minMs));
+
+// Pacing per question: "reading" pause before answering + pause after the solution shows.
+// ~12–20s per question → a 47-question pool takes roughly 10–15 minutes.
+const HARVEST_READ_MS  = [9000, 14000];
+const HARVEST_AFTER_MS = [2500, 4500];
+
+async function waitFor(fn, timeout = 5000) {
+  for (let t = 0; t < timeout; t += 100) {
+    if (fn()) return true;
+    await sleep(100);
+  }
+  return false;
+}
+
+let harvesting  = false;
+let harvestStop = false;
+
+// "Alle Pools durchlernen": remaining Üben-URLs live in storage so the chain survives the
+// page loads between pools. init() picks it up on every BEV page (see resumeHarvestQueue).
+const QUEUE_KEY = 'bev_harvest_queue';
+
+function getHarvestQueue() {
+  return new Promise(resolve => chrome.storage.local.get([QUEUE_KEY], r => resolve(r[QUEUE_KEY] || [])));
+}
+
+function setHarvestQueue(queue) {
+  if (!isContextValid()) return;
+  try { chrome.storage.local.set({ [QUEUE_KEY]: queue }); } catch {}
+}
+
+function startHarvestAll() {
+  const urls = [...new Set([...document.querySelectorAll('a[title^="Üben"]')].map(a => a.href))];
+  if (urls.length === 0) return;
+  setHarvestQueue(urls);
+  setStatus(`🤖 ${urls.length} Pools in der Warteschlange – starte…`);
+  location.href = urls[0];
+}
+
+async function continueHarvestQueue() {
+  const queue = await getHarvestQueue();
+  if (queue.length === 0) return;
+  setStatus(`✅ Pool fertig – nächster Pool gleich (${queue.length} übrig)…`);
+  await sleepRandom(3000, 6000);
+  location.href = queue[0];
+}
+
+// Practice page that's next in the queue → take it off and start. Any other BEV page (e.g.
+// the stats page the site redirects to after a pool) → go to the next queued pool.
+async function resumeHarvestQueue() {
+  const queue = await getHarvestQueue();
+  if (queue.length === 0) return;
+  if (isBevPracticeMode() && queue[0] === location.href) {
+    setHarvestQueue(queue.slice(1));
+    await sleepRandom(2000, 4000);
+    harvestBevPool();
+  } else if (!isBevPracticeMode()) {
+    await sleepRandom(2000, 4000);
+    location.href = queue[0];
+  }
+}
+
+async function harvestBevPool() {
+  if (harvesting) {
+    harvestStop = true;
+    setHarvestQueue([]);
+    setStatus('⏹ Stoppe nach dieser Frage…');
+    return;
+  }
+  if (!isBevPracticeMode()) return;
+  harvesting  = true;
+  harvestStop = false;
+  document.getElementById('cm-harvest-btn').textContent = '⏹ Durchlauf stoppen';
+  const before = Object.keys(knownAnswers).length;
+  let done = 0;
+  const resultShown = () => {
+    const r = document.getElementById('fkResult');
+    return r && getComputedStyle(r).display !== 'none';
+  };
+
+  try {
+    while (!resultShown() && !harvestStop) {
+      const card = document.querySelector('.fk-card');
+      if (!card || !getQuestionText(card)) break;
+
+      if (!card.querySelector('.fk-opt.locked')) {
+        await sleepRandom(...HARVEST_READ_MS);
+        if (harvestStop) break;
+        card.querySelector('.fk-opt')?.click();
+        await sleepRandom(400, 1200);
+        document.getElementById('fkAnswer')?.click();
+        if (!await waitFor(() => document.querySelector('.fk-opt.correct'))) {
+          setStatus('⚠️ Keine Lösung angezeigt – abgebrochen.');
+          setHarvestQueue([]);
+          return;
+        }
+      }
+      learnFromVisibleFeedback();
+      done++;
+      setStatus(`🤖 ${done} Fragen durchgelernt…`);
+      await sleepRandom(...HARVEST_AFTER_MS);
+      if (harvestStop) break;
+
+      document.getElementById('fkNext')?.click();
+      // Next question is rendered unlocked; wait for that (not text change — stems can repeat).
+      if (!await waitFor(() => resultShown() || !document.querySelector('.fk-opt.locked'))) break;
+      await sleep(300);
+    }
+    const added = Object.keys(knownAnswers).length - before;
+    setStatus(`${harvestStop ? '⏹ Gestoppt' : '✅ Pool fertig'}: ${done} Fragen, ${added} neu gespeichert.`);
+    if (!harvestStop) await continueHarvestQueue();
+  } finally {
+    harvesting = false;
+    document.getElementById('cm-harvest-btn').textContent = '🤖 Pool automatisch durchlernen';
+    updateOverlay();
   }
 }
 
@@ -575,7 +727,7 @@ function startMainObserver() {
 
       const hasUnfilled = getQuestionLists().some(list => {
         const alreadyChecked = list.querySelector(
-          '.radio-checked, ion-radio[aria-checked="true"], ion-checkbox[aria-checked="true"], .item-checkbox-checked, .item-radio-checked'
+          '.radio-checked, ion-radio[aria-checked="true"], ion-checkbox[aria-checked="true"], .item-checkbox-checked, .item-radio-checked, .fk-opt.sel, .fk-opt.locked'
         );
         return !alreadyChecked && findBestMatch(list);
       });
@@ -605,7 +757,7 @@ function debugDOM() {
   lists.forEach((list, i) => {
     const qText = getQuestionText(list);
     const qKey  = getQuestionKey(list);
-    const items = list.querySelectorAll('ion-item');
+    const items = getAnswerItems(list);
     const ticks = list.querySelectorAll('.circular-tick, .circular-tick-holo');
     const xs    = list.querySelectorAll('.circular-x');
     const hasAux = list.querySelectorAll('input.aux-input').length;
@@ -659,7 +811,7 @@ function exportAnswers() {
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href     = url;
-  a.download = `eishockey-antworten-${new Date().toISOString().slice(0,10)}.json`;
+  a.download = `${EXPORT_NAME}-${new Date().toISOString().slice(0,10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
   setStatus(`📤 ${total} Antworten exportiert.`);
@@ -693,7 +845,7 @@ function exportAnswersHTML() {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Eishockey Regeltest – Antworten</title>
+  <title>${EXPORT_TITLE}</title>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:'Segoe UI',Arial,sans-serif;background:#1a1a2e;color:#e0e0e0;min-height:100vh;-webkit-text-size-adjust:100%}
@@ -719,7 +871,7 @@ function exportAnswersHTML() {
 </head>
 <body>
   <header>
-    <h1>🏒 Eishockey Regeltest – Antworten</h1>
+    <h1>🏒 ${EXPORT_TITLE}</h1>
     <p class="meta">Exportiert am ${date} &middot; ${total} Fragen &middot; Suche v2 (Multi-Wort)</p>
     <input id="search" type="search" placeholder="Frage oder Antwort suchen…" autocomplete="off" autocapitalize="off" autocorrect="off">
     <div id="count">${total} Fragen angezeigt</div>
@@ -770,7 +922,7 @@ function exportAnswersHTML() {
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href     = url;
-  a.download = `eishockey-antworten-${new Date().toISOString().slice(0,10)}.html`;
+  a.download = `${EXPORT_NAME}-${new Date().toISOString().slice(0,10)}.html`;
   a.click();
   URL.revokeObjectURL(url);
   setStatus(`📋 ${total} Antworten als HTML exportiert.`);
@@ -799,7 +951,7 @@ function exportAnswersPDF() {
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Eishockey Regeltest – Antworten</title>
+  <title>${EXPORT_TITLE}</title>
   <style>
     @page { margin: 14mm; }
     *{box-sizing:border-box;margin:0;padding:0}
@@ -814,7 +966,7 @@ function exportAnswersPDF() {
   </style>
 </head>
 <body onload="window.print()">
-  <h1>🏒 Eishockey Regeltest – Antworten</h1>
+  <h1>🏒 ${EXPORT_TITLE}</h1>
   <p class="meta">Exportiert am ${date} · ${total} Fragen · im PDF-Viewer mit der 🔍-Lupe suchen</p>
   ${cardsHtml}
 </body>
@@ -833,6 +985,14 @@ function exportAnswersPDF() {
 
 function importAnswers(file) {
   if (!file) return;
+  // Guard against mixing the two stores: export filenames tell the sites apart.
+  const fileIsBev = file.name.startsWith('bev-');
+  if (fileIsBev !== IS_BEV &&
+      !confirm(`Die Datei "${file.name}" sieht nach ${fileIsBev ? 'BEV-Fragenkatalog' : 'ClassMarker'} aus, ` +
+               `du bist aber auf ${IS_BEV ? 'BEV-Fragenkatalog' : 'ClassMarker'}. Trotzdem importieren?`)) {
+    setStatus('⚠️ Import abgebrochen.');
+    return;
+  }
   const reader = new FileReader();
   reader.onload = e => {
     try {
@@ -875,6 +1035,7 @@ async function init() {
 
   updateOverlay();
   startMainObserver();
+  if (IS_BEV) resumeHarvestQueue();
 }
 
 init();
