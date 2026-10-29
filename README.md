@@ -43,6 +43,17 @@ So importierst du sie:
 
 ---
 
+### BEV-Fragenkatalog (eishockey-management.de)
+
+Die Extension läuft auch im BEV-Fragenkatalog — mit einem **eigenen, getrennten Speicher**. ClassMarker- und BEV-Antworten vermischen sich nicht.
+
+- Fertige Antwortdatei: **`bev-fragenkatalog-antworten.json`** (alle 8 Pools, 433 Fragen) — auf eishockey-management.de über das Overlay importieren
+- **Üben-Modus:** Lösungen werden nach „Antwort prüfen“ automatisch gelernt
+- **🤖 Pool automatisch durchlernen** (im Üben-Modus) bzw. **🤖 Alle Pools durchlernen** (Übersicht) — ca. 12–20 s pro Frage
+- **F** füllt bekannte Antworten aus
+
+---
+
 ## 🔧 Benutzung
 
 | Seite | Was passiert |
