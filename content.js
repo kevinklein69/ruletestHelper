@@ -168,7 +168,7 @@ function createOverlay() {
   overlayEl.id = 'cm-helper-overlay';
   overlayEl.innerHTML = `
     <div id="cm-header">
-      <span id="cm-title">🏒 ${IS_BEV ? 'BEV-Fragenkatalog' : 'Regeltest Helper'} v${chrome.runtime.getManifest().version}</span>
+      <span id="cm-title">🏒 ${IS_BEV ? 'BEV-Fragenkatalog' : 'Regeltest Helper'}</span>
       <button id="cm-toggle">▴</button>
     </div>
     <div id="cm-body">
@@ -265,7 +265,7 @@ function updateOverlay() {
   const total   = Object.keys(knownAnswers).length;
   const pending = Object.keys(pendingAnswers).length;
 
-  if (overlayCount) overlayCount.textContent = `Gespeichert: ${total} Frage${total !== 1 ? 'n' : ''}`;
+  if (overlayCount) overlayCount.textContent = `Gespeichert: ${total} Frage${total !== 1 ? 'n' : ''} · v${chrome.runtime.getManifest().version}`;
 
   const pendingEl = document.getElementById('cm-pending');
   if (pendingEl) {
