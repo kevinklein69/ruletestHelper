@@ -3,8 +3,7 @@ Ein BEV-Regel-Update-PDF ("REGEL-UPDATE 2026/27") wird erkannt; dessen Einträge
 `update` + `refs` (betroffene Regeln) und werden in der Extension bei diesen Regeln angezeigt.
 
 Aufruf:  python3 build-regelwerk.py "<Regelbuch>.pdf" ["<Regel-Update>.pdf" ...]
-Braucht pypdf (pip install pypdf). regelwerk.json ist urheberrechtlich geschützter Text
-→ steht in .gitignore und bleibt lokal.
+Braucht pypdf (pip install pypdf).
 """
 import json, re, sys
 from pypdf import PdfReader

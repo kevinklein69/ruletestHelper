@@ -57,16 +57,16 @@ Die Extension läuft auch im BEV-Fragenkatalog — mit einem **eigenen, getrennt
 
 ---
 
-### 📖 Regelstellen im Vergleichsfenster (optional, lokal)
+### 📖 Regelstellen im Vergleichsfenster
 
-Bei nicht exakt bekannten Fragen zeigt das Vergleichsfenster die passendsten Abschnitte aus dem Regelbuch (aufklappbar mit vollem Text). Das Regelbuch ist urheberrechtlich geschützt und liegt deshalb **nicht** im Repo — einmal lokal bauen:
+Bei nicht exakt bekannten Fragen zeigt das Vergleichsfenster die passendsten Abschnitte aus dem Regelbuch (aufklappbar mit vollem Text). `regelwerk.json` (IIHF-Regelbuch 2025/26 DE + BEV-Regel-Update 2026/27) liegt bereits im Repo – nichts zu tun. Nur bei einem neuen Regelbuch neu bauen:
 
 ```bash
 pip install pypdf
 python3 build-regelwerk.py "2025-2026 IIHF Regelbuch DE V1.0.pdf" "BEV_Regelupdate_2026-27_Kompakt.pdf"
 ```
 
-Einträge aus dem Regel-Update erscheinen als **🆕** direkt bei der betroffenen Regel (das Regelbuch selbst ist dort noch die alte Fassung). Danach die Extension unter `chrome://extensions` neu laden. Ohne `regelwerk.json` ist die Funktion einfach aus.
+Einträge aus dem Regel-Update erscheinen als **🆕** direkt bei der betroffenen Regel (das Regelbuch selbst ist dort noch die alte Fassung). Danach die Extension unter `chrome://extensions` neu laden.
 
 ---
 
