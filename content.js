@@ -161,6 +161,41 @@ function getQuestionKey(listEl) {
 
 // ─── Overlay ──────────────────────────────────────────────────────────────────
 
+// Drag an overlay by its head (selector, so re-rendered heads keep working). Position is
+// remembered per overlay in chrome.storage; double-click on the head resets to the default spot.
+function makeDraggable(el, headSel) {
+  const key = 'cmPos_' + el.id;
+  const place = p => Object.assign(el.style, p
+    ? { left: p.x + 'px', top: p.y + 'px', right: 'auto', width: p.w ? p.w + 'px' : '' }
+    : { left: '', top: '', right: '', width: '' });
+  try { chrome.storage.local.get([key], r => r[key] && place(r[key])); } catch {}
+  el.addEventListener('dblclick', e => {
+    if (!e.target.closest(headSel) || e.target.closest('button')) return;
+    place(null);
+    try { chrome.storage.local.remove(key); } catch {}
+  });
+  el.addEventListener('pointerdown', e => {
+    if (e.button !== 0 || !e.target.closest(headSel) || e.target.closest('button')) return;
+    e.preventDefault();
+    const r = el.getBoundingClientRect(), dx = e.clientX - r.left, dy = e.clientY - r.top;
+    const w = el.id === 'cm-compare' ? Math.round(r.width) : 0;   // bar is sized by left+right → freeze width
+    let pos = null;
+    const move = ev => {
+      // keep the whole overlay on screen, same rule on every edge
+      pos = { x: Math.round(Math.max(0, Math.min(ev.clientX - dx, innerWidth - r.width))),
+              y: Math.round(Math.max(0, Math.min(ev.clientY - dy, innerHeight - r.height))), w };
+      place(pos);
+    };
+    const up = () => {
+      removeEventListener('pointermove', move);
+      removeEventListener('pointerup', up);
+      if (pos) try { chrome.storage.local.set({ [key]: pos }); } catch {}
+    };
+    addEventListener('pointermove', move);
+    addEventListener('pointerup', up);
+  });
+}
+
 function createOverlay() {
   if (overlayEl) return;
 
@@ -190,6 +225,7 @@ function createOverlay() {
     </div>
   `;
   document.body.appendChild(overlayEl);
+  makeDraggable(overlayEl, '#cm-header');
 
   overlayStatus = document.getElementById('cm-status');
   overlayCount  = document.getElementById('cm-count');
@@ -819,6 +855,7 @@ function renderCompare(lists) {
     panel = document.createElement('div');
     panel.id = 'cm-compare';
     document.body.appendChild(panel);
+    makeDraggable(panel, '#cm-compare-head');
     panel.addEventListener('click', e => {
       if (e.target.id === 'cm-compare-close') { panel.remove(); clearQuestionHighlights(); return; }
       const hit = e.target.closest('.cm-cmp-hit');
