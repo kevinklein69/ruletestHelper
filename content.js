@@ -7,12 +7,15 @@ const IS_BEV       = location.hostname.endsWith('eishockey-management.de');
 const STORAGE_KEY  = IS_BEV ? 'bev_fragenkatalog_answers' : 'cm_eishockey_answers';
 const OTHER_KEY    = IS_BEV ? 'cm_eishockey_answers' : 'bev_fragenkatalog_answers';
 const PENDING_KEY  = 'cm_pending_answers';
+const REFS_KEY     = 'bev_rule_refs';   // question key → BEV solution reference ("RG 40 PHYSISCHE …")
+const REFS_EXPORT  = '__regelangaben';  // reserved key for them in the exported answers JSON
 const EXPORT_NAME  = IS_BEV ? 'bev-fragenkatalog-antworten' : 'eishockey-antworten';
 const EXPORT_TITLE = IS_BEV ? 'BEV-Fragenkatalog – Antworten' : 'Eishockey Regeltest – Antworten';
 
 let knownAnswers   = {};
 let otherAnswers   = {};   // the OTHER site's store — read-only fallback for auto-fill/compare panel
 let pendingAnswers = {};   // selected answers during current quiz run
+let ruleRefs       = {};   // BEV only: rule reference shown with the solution, per question key
 let overlayEl      = null;
 let overlayStatus  = null;
 let overlayCount   = null;
@@ -24,7 +27,8 @@ let fuzzyFilled    = 0;    // fuzzy-matched questions filled in the last fillCur
 
 function loadAnswers() {
   return new Promise(resolve => {
-    chrome.storage.local.get([STORAGE_KEY, OTHER_KEY, PENDING_KEY], result => {
+    chrome.storage.local.get([STORAGE_KEY, OTHER_KEY, PENDING_KEY, REFS_KEY], result => {
+      ruleRefs       = result[REFS_KEY]     || {};
       knownAnswers   = result[STORAGE_KEY]  || {};
       otherAnswers   = result[OTHER_KEY]    || {};
       pendingAnswers = result[PENDING_KEY]  || {};
@@ -425,6 +429,20 @@ function learnFromResults() {
 // which has no way to know if a selection was actually correct.
 const learnedFeedbackKeys = new Set();
 
+// BEV shows the rule with the solution ("RG 40 PHYSISCHE TÄTLICHKEIT GEGEN OFFIZIELLE RG 40.1. SH").
+// Exact for questions answered once — keyword search can't know that a LP is an "Offizieller".
+// ponytail: DOM of the solution box unknown → deepest page element whose text has "RG <number>".
+function learnRuleRef(qKey) {
+  const el = [...document.querySelectorAll('body *')].reverse().find(e =>
+    /\bRG\.?\s*\d{1,3}/.test(e.textContent) && !e.closest('#cm-compare, #cm-helper-overlay'));
+  const ref = el?.textContent.replace(/\s+/g, ' ').trim().slice(0, 300);
+  if (!ref || ruleRefs[qKey] === ref) return;
+  ruleRefs[qKey] = ref;
+  if (isContextValid()) try { chrome.storage.local.set({ [REFS_KEY]: ruleRefs }); } catch {}
+  console.log('[CM Helper] Regelangabe gelernt:', ref);
+  if (document.getElementById('cm-compare')) renderCompare(getQuestionLists());   // show it right away
+}
+
 function learnFromVisibleFeedback() {
   let learned = 0;
 
@@ -434,6 +452,7 @@ function learnFromVisibleFeedback() {
     if (!hasFeedback) return;
 
     const qKey = getQuestionKey(list);
+    if (IS_BEV && qKey) learnRuleRef(qKey);   // before the guard: the reference may render later
     if (!qKey || learnedFeedbackKeys.has(qKey)) return;
 
     // Feedback icons are present on this exact list, so trust them fully (no fallback needed).
@@ -809,19 +828,41 @@ function answerKeys(question, answers) {
 const markKeys = (text, keys) => text.split(/(\s+)/).map(w =>
   ruleTerms(w).some(t => keys.has(t)) ? `<mark class="cm-key">${escapeHtml(w)}</mark>` : escapeHtml(w)).join('');
 
-function renderRules(question, answers) {
+// Sections a stored BEV reference points to: "40.1" → that section, "RG 40" → best sections of rule 40.
+function refRules(ref, query) {
+  const nums = [...ref.matchAll(/RG\.?\s*(\d{1,3}(?:\.\d{1,2})?)/g)].map(m => m[1]);
+  const exact = rules.filter(r => !r.update && nums.includes(r.id));
+  if (exact.length) return exact;
+  const ruleNos = nums.map(n => n.split('.')[0]);
+  const ofRule = r => !r.update && ruleNos.includes(r.id.split('.')[0]);
+  return searchRules(query, rules.length).map(h => h.r).filter(ofRule).slice(0, 3);
+}
+
+function renderRules(question, answers, ref) {
   const query = splitCompounds(question + ' ' + answers);
-  const hits = searchRules(query);
+  const fromRef = ref && rules ? refRules(ref, query) : [];
+  const hits = [...fromRef.map(r => ({ r })), ...searchRules(query).filter(h => !fromRef.includes(h.r))];
   if (!hits.length) return '';
   const keys = answerKeys(question, answers), hl = t => markKeys(t, keys);
   const upd = u => `<div class="cm-cmp-update">🆕 <b>${escapeHtml(u.id.replace('🆕 ', ''))} – ` +
     `${escapeHtml(u.title)} (${escapeHtml(u.rule)}):</b> ${hl(u.text)}</div>`;
-  return `<div class="cm-cmp-rules"><div class="cm-cmp-score">📖 Passende Regelstellen · <mark class="cm-key">markiert</mark> = Wörter aus den Antworten</div>` +
+  return `<div class="cm-cmp-rules">` +
+    (ref ? `<div class="cm-cmp-good">✅ Laut BEV-Lösung: ${escapeHtml(ref)}</div>` : '') +
+    `<div class="cm-cmp-score">📖 Passende Regelstellen · <mark class="cm-key">markiert</mark> = Wörter aus den Antworten</div>` +
     hits.map(({ r }) => r.update ? upd(r) :
       `<details><summary><b>${escapeHtml(r.id)} ${escapeHtml(r.title)}</b>` +
       `<span class="cm-cmp-rule">${escapeHtml(r.rule)}</span><br>„${hl(bestSentence(r.text, query))}“</summary>` +
       `<div class="cm-cmp-ruletext">${hl(r.text)}</div></details>` +
       updatesFor(r).map(upd).join('')).join('') + '</div>';
+}
+
+// Exact key first; else same question text with other option order/wording, if only one exists.
+function findRuleRef(list) {
+  const key = getQuestionKey(list);
+  if (ruleRefs[key]) return ruleRefs[key];
+  const q = getQuestionText(list) + '\x01';
+  const same = Object.keys(ruleRefs).filter(k => k.startsWith(q));
+  return same.length === 1 ? ruleRefs[same[0]] : '';
 }
 
 // ─── Compare panel: "Frage zu 90% identisch zu …" ─────────────────────────────
@@ -888,7 +929,7 @@ function renderCompare(lists) {
         ? `<div class="cm-cmp-good">✔ Eindeutig: keine ähnlich nahe Variante mit anderer Lösung${hits[1] ? ` (nächste: ${Math.round(hits[1].score * 100)}%)` : ''}.</div>`
         : `<div class="cm-cmp-warn">⚠️ Keine Frage über 95% – eventuell neu oder stark umgebaut, selbst prüfen.</div>`;
     const answers = getAnswerItems(list).map(getAnswerText).join(' ');
-    return `<div class="cm-cmp-section" data-i="${i}"><div class="cm-cmp-now"><b>Jetzt:</b> <span class="cm-cmp-nowtext">${markDiff(qText, ref?.keyText || qText)}</span></div>${verdict}<div class="cm-cmp-grid">${body}${renderRules(qText, answers)}</div></div>`;
+    return `<div class="cm-cmp-section" data-i="${i}"><div class="cm-cmp-now"><b>Jetzt:</b> <span class="cm-cmp-nowtext">${markDiff(qText, ref?.keyText || qText)}</span></div>${verdict}<div class="cm-cmp-grid">${body}${renderRules(qText, answers, findRuleRef(list))}</div></div>`;
   });
   if (!sections.length) return;
   if (!panel) {
@@ -1220,7 +1261,9 @@ function exportAnswers() {
     setStatus('⚠️ Keine Antworten zum Exportieren.');
     return;
   }
-  const data = JSON.stringify(knownAnswers, null, 2);
+  // BEV rule references ride along under a reserved key, so it stays one file to import.
+  const refs = Object.keys(ruleRefs).length ? { [REFS_EXPORT]: ruleRefs } : {};
+  const data = JSON.stringify({ ...knownAnswers, ...refs }, null, 2);
   const blob = new Blob([data], { type: 'application/json' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
@@ -1228,7 +1271,8 @@ function exportAnswers() {
   a.download = `${EXPORT_NAME}-${new Date().toISOString().slice(0,10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
-  setStatus(`📤 ${total} Antworten exportiert.`);
+  const nRefs = Object.keys(ruleRefs).length;
+  setStatus(`📤 ${total} Antworten exportiert${nRefs ? ` (+ ${nRefs} Regelangaben)` : ''}.`);
 }
 
 function escapeHtml(str) {
@@ -1412,6 +1456,12 @@ function importAnswers(file) {
     try {
       const imported = JSON.parse(e.target.result);
       if (typeof imported !== 'object' || Array.isArray(imported)) throw new Error();
+      const refs = imported[REFS_EXPORT] || {};
+      delete imported[REFS_EXPORT];
+      if (Object.keys(refs).length) {
+        Object.assign(ruleRefs, refs);
+        if (isContextValid()) try { chrome.storage.local.set({ [REFS_KEY]: ruleRefs }); } catch {}
+      }
       let added = 0;
       Object.entries(imported).forEach(([q, a]) => {
         if (!knownAnswers[q]) added++;
@@ -1419,7 +1469,9 @@ function importAnswers(file) {
       });
       saveAnswers();
       updateOverlay();
-      setStatus(`📥 ${Object.keys(imported).length} Antworten importiert (+${added} neu).`);
+      const nRefs = Object.keys(refs).length;
+      setStatus(`📥 ${Object.keys(imported).length} Antworten importiert (+${added} neu)` +
+                `${nRefs ? `, ${nRefs} Regelangaben` : ''}.`);
     } catch {
       setStatus('⚠️ Import fehlgeschlagen – ungültige Datei.');
     }

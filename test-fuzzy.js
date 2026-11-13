@@ -8,6 +8,7 @@ vm.createContext(ctx);
 vm.runInContext(fs.readFileSync(dir + 'content.js', 'utf8').replace(/\ninit\(\);\s*$/, ''), ctx);
 for (const file of ['eishockey-antworten-merged.json', 'bev-fragenkatalog-antworten.json']) {
   const all = JSON.parse(fs.readFileSync(dir + file, 'utf8'));
+  delete all.__regelangaben;   // rule references, not a question
   let hits = 0, wrong = 0;
   for (const [key, val] of Object.entries(all)) {
     const rest = { ...all }; delete rest[key];
@@ -38,7 +39,9 @@ for (const file of ['eishockey-antworten-merged.json', 'bev-fragenkatalog-antwor
 // CM file has no option lists, so options = CM answers ∪ BEV answers (approximation).
 {
   const cm = JSON.parse(fs.readFileSync(dir + 'eishockey-antworten-merged.json', 'utf8'));
+  delete cm.__regelangaben;
   ctx.__ka = JSON.parse(fs.readFileSync(dir + 'bev-fragenkatalog-antworten.json', 'utf8'));
+  delete ctx.__ka.__regelangaben;
   vm.runInContext('knownAnswers = globalThis.__ka', ctx);
   const txt = k => k.split(/[|\x01]/)[0];
   const byText = {}; for (const [k, v] of Object.entries(ctx.__ka)) (byText[txt(k)] ||= []).push(v);
