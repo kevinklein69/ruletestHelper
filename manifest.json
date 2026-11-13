@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ClassMarker Eishockey Regeltest Helper",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Lernt richtige Antworten beim Eishockey-Regeltest auf ClassMarker und füllt sie automatisch aus.",
   "permissions": [
     "storage",
