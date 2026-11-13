@@ -61,10 +61,15 @@ def sections(path):
     for s in out:
         words, fixed = s['text'].split(' '), []
         for w in words:
-            if fixed and re.fullmatch(r'\w+', w) and re.search(r'\w+$', fixed[-1]):
-                tail = re.search(r'\w+$', fixed[-1]).group()
-                joined = (tail + w).lower()
-                if joined in vocab and (tail.lower() not in vocab or w.lower() not in vocab or len(w) <= 2):
+            # head = Wortanfang ohne Satzzeichen ("n," → "n"); einzelner Buchstabe davor
+            # ("V erlassen") ist fast immer ein Fragment, auch wenn "v" anderswo als Bruchstück vorkommt.
+            head, tail = re.match(r'\w*', w).group(), re.search(r'\w+$', fixed[-1]) if fixed else None
+            if head and tail and not (tail.group()[-1].isdigit() and w != head):   # "3 1/2", "15 ft)"
+                tail = tail.group()
+                joined = (tail + head).lower()
+                unit = len(fixed) > 1 and fixed[-2][-1:].isdigit()     # "3 m und" ≠ "mund"
+                if joined in vocab and (tail.lower() not in vocab or head.lower() not in vocab
+                                        or len(head) <= 2 or (len(tail) == 1 and not unit)):
                     fixed[-1] += w
                     continue
             fixed.append(w)

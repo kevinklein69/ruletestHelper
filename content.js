@@ -722,10 +722,12 @@ function searchRules(query, n = 3) {
   })).sort((a, b) => b.score - a.score).slice(0, n).filter(h => h.score > 0);
 }
 
-// Sentence of the section that shares most terms with the query — as teaser.
+// Sentence of the section that shares the rarest/most terms with the query (IDF-weighted, so
+// "torhüter"/"strafe" count less than "angreifer") — as teaser.
 function bestSentence(text, query) {
   const q = new Set(ruleTerms(query));
-  return text.split(/(?<=[.!?])\s+/).map(s => ({ s, hits: ruleTerms(s).filter(t => q.has(t)).length }))
+  return text.split(/(?<=[.!?])\s+/).map(s => ({ s, hits: [...new Set(ruleTerms(s))].filter(t => q.has(t))
+    .reduce((sum, t) => sum + ruleIdf(t), 0) }))
     .sort((a, b) => b.hits - a.hits)[0].s;
 }
 
