@@ -995,9 +995,9 @@ function fillCurrentQuestion() {
   renderCompare(unsure);
 
   const fuzzyNote = fuzzyFilled ? ` (⚠️ ${fuzzyFilled} davon ähnlich oder aus dem anderen Katalog – bitte prüfen)` : '';
-  const cmpNote = unsure.length ? ' · 🔎 Ähnliche Fragen im Vergleichsfenster unten.' : '';
+  const cmpNote = unsure.length ? ' · 🔎 Ähnliche Fragen im Vergleichsfenster oben.' : '';
   setStatus(filled > 0 ? `✅ ${filled} Frage(n) ausgefüllt${fuzzyNote}${cmpNote}`
-    : unsure.length ? '🔎 Nicht exakt bekannt – ähnliche Fragen im Vergleichsfenster unten.'
+    : unsure.length ? '🔎 Nicht exakt bekannt – ähnliche Fragen im Vergleichsfenster oben.'
     : '⚠️ Kein Match — Details in Konsole (F12).');
 }
 
