@@ -725,10 +725,13 @@ let ruleIdf = null;
 
 // Crude German suffix stripping, applied until stable so "kapitän/kapitäne/kapitänen" agree.
 const stem = w => {
-  for (let prev = ''; w !== prev && w.length > 4;) { prev = w; w = w.replace(/(en|er|es|em|e|n|s)$/, ''); }
+  for (let prev = ''; w !== prev && w.length > 3;) { prev = w; w = w.replace(/(en|er|es|em|e|n|s)$/, ''); }
   return w;
 };
-const ruleTerms = text => tokenize(text).map(stem);
+// Questions use other words than the IIHF rulebook (stemmed form → rulebook term).
+const SYNONYMS = { penaltyschu: 'strafschu', penalty: 'strafschu' };
+// Cut to 7 chars so inflections the suffix stripper misses still meet ("verschiebt"/"Verschiebens").
+const ruleTerms = text => tokenize(text).map(w => { w = stem(w); return (SYNONYMS[w] || w).slice(0, 7); });
 
 async function loadRules() {
   try {
@@ -745,7 +748,7 @@ async function loadRules() {
   } catch { /* no regelwerk.json → feature off */ }
 }
 
-function searchRules(query, n = 3) {
+function searchRules(query, n = 4) {
   if (!rules) return [];
   const q = [...new Set(ruleTerms(query))];
   const avg = rules.reduce((a, r) => a + r.len, 0) / rules.length;
