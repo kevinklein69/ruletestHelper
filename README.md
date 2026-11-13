@@ -51,6 +51,22 @@ Die Extension läuft auch im BEV-Fragenkatalog — mit einem **eigenen, getrennt
 - **Üben-Modus:** Lösungen werden nach „Antwort prüfen“ automatisch gelernt
 - **🤖 Pool automatisch durchlernen** (im Üben-Modus) bzw. **🤖 Alle Pools durchlernen** (Übersicht) — ca. 12–20 s pro Frage
 - **F** füllt bekannte Antworten aus
+- **Shift + F** öffnet bzw. schließt Vergleichsleiste + Widget (ähnliche Fragen, Lösungen, Regelstellen) – ohne etwas anzuklicken
+- **Gegenseitige Rückfallebene:** Findet eine Seite eine Frage nicht im eigenen Speicher, nimmt sie den Speicher der anderen Seite (z. B. BEV-Antworten im ClassMarker-Test). Dafür beide Dateien je einmal auf ihrer Seite importieren.
+- **Abgewandelte Fragen:** Tippfehler, Satzzeichen und Artikel werden toleriert. Nur *ähnliche* Fragen (andere Wörter → oft Fallen) werden nicht angeklickt; stattdessen zeigt ein Vergleichsfenster die ähnlichsten gespeicherten Fragen mit Lösungen und markierten Unterschieden. Prüfen: `node test-fuzzy.js`
+
+---
+
+### 📖 Regelstellen im Vergleichsfenster (optional, lokal)
+
+Bei nicht exakt bekannten Fragen zeigt das Vergleichsfenster die passendsten Abschnitte aus dem Regelbuch (aufklappbar mit vollem Text). Das Regelbuch ist urheberrechtlich geschützt und liegt deshalb **nicht** im Repo — einmal lokal bauen:
+
+```bash
+pip install pypdf
+python3 build-regelwerk.py "2025-2026 IIHF Regelbuch DE V1.0.pdf" "BEV_Regelupdate_2026-27_Kompakt.pdf"
+```
+
+Einträge aus dem Regel-Update erscheinen als **🆕** direkt bei der betroffenen Regel (das Regelbuch selbst ist dort noch die alte Fassung). Danach die Extension unter `chrome://extensions` neu laden. Ohne `regelwerk.json` ist die Funktion einfach aus.
 
 ---
 

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ClassMarker Eishockey Regeltest Helper",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Lernt richtige Antworten beim Eishockey-Regeltest auf ClassMarker und füllt sie automatisch aus.",
   "permissions": [
     "storage",
@@ -13,9 +13,16 @@
   ],
   "content_scripts": [
     {
-      "matches": ["https://*.classmarker.com/*", "https://eishockey-management.de/*"],
-      "js": ["content.js"],
-      "css": ["overlay.css"],
+      "matches": [
+        "https://*.classmarker.com/*",
+        "https://eishockey-management.de/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "overlay.css"
+      ],
       "run_at": "document_idle"
     }
   ],
@@ -31,5 +38,16 @@
     "16": "icon16.png",
     "48": "icon48.png",
     "128": "icon128.png"
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "regelwerk.json"
+      ],
+      "matches": [
+        "https://*.classmarker.com/*",
+        "https://eishockey-management.de/*"
+      ]
+    }
+  ]
 }

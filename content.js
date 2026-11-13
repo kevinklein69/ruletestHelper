@@ -5,24 +5,28 @@
 // import/export/clear/auto-fill only ever touch the store of the site you're on.
 const IS_BEV       = location.hostname.endsWith('eishockey-management.de');
 const STORAGE_KEY  = IS_BEV ? 'bev_fragenkatalog_answers' : 'cm_eishockey_answers';
+const OTHER_KEY    = IS_BEV ? 'cm_eishockey_answers' : 'bev_fragenkatalog_answers';
 const PENDING_KEY  = 'cm_pending_answers';
 const EXPORT_NAME  = IS_BEV ? 'bev-fragenkatalog-antworten' : 'eishockey-antworten';
 const EXPORT_TITLE = IS_BEV ? 'BEV-Fragenkatalog – Antworten' : 'Eishockey Regeltest – Antworten';
 
 let knownAnswers   = {};
+let otherAnswers   = {};   // the OTHER site's store — read-only fallback for auto-fill/compare panel
 let pendingAnswers = {};   // selected answers during current quiz run
 let overlayEl      = null;
 let overlayStatus  = null;
 let overlayCount   = null;
 let learnedThisSession = false;
 let watchDebounce  = null;
+let fuzzyFilled    = 0;    // fuzzy-matched questions filled in the last fillCurrentQuestion()
 
 // ─── Storage ──────────────────────────────────────────────────────────────────
 
 function loadAnswers() {
   return new Promise(resolve => {
-    chrome.storage.local.get([STORAGE_KEY, PENDING_KEY], result => {
+    chrome.storage.local.get([STORAGE_KEY, OTHER_KEY, PENDING_KEY], result => {
       knownAnswers   = result[STORAGE_KEY]  || {};
+      otherAnswers   = result[OTHER_KEY]    || {};
       pendingAnswers = result[PENDING_KEY]  || {};
       resolve();
     });
@@ -91,9 +95,13 @@ function getAnswerText(itemEl) {
 }
 
 // Strict answer matching — avoids "große strafe" matching "große strafe mit..."
+// ClassMarker uses true/false where BEV uses ja/nein; texts sometimes lose a space ("denhelm").
+const YES_NO = { ja: 'ja', true: 'ja', richtig: 'ja', wahr: 'ja', nein: 'nein', false: 'nein', falsch: 'nein' };
+const canonAnswer = t => YES_NO[t] || t.replace(/\s+/g, '');
+
 function answerMatches(itemText, savedAnswer) {
   if (!itemText || !savedAnswer) return false;
-  if (itemText === savedAnswer) return true;
+  if (canonAnswer(itemText) === canonAnswer(savedAnswer)) return true;
   // Only allow substring match if lengths are within 15% of each other
   const ratio = Math.min(itemText.length, savedAnswer.length) /
                 Math.max(itemText.length, savedAnswer.length);
@@ -109,9 +117,13 @@ function getAnswerItems(list) {
   return Array.from(list.querySelectorAll(IS_BEV ? 'button.fk-opt' : 'ion-item'));
 }
 
-function getQuestionText(listEl) {
-  const el = listEl.querySelector(IS_BEV ? '#fkFrage'
+function getQuestionEl(listEl) {
+  return listEl.querySelector(IS_BEV ? '#fkFrage'
     : '.question-text .bbcode, .question-text, ion-list-header .bbcode, ion-list-header');
+}
+
+function getQuestionText(listEl) {
+  const el = getQuestionEl(listEl);
   return el ? normalizeText(el.textContent) : '';
 }
 
@@ -156,7 +168,7 @@ function createOverlay() {
   overlayEl.id = 'cm-helper-overlay';
   overlayEl.innerHTML = `
     <div id="cm-header">
-      <span id="cm-title">🏒 ${IS_BEV ? 'BEV-Fragenkatalog' : 'Regeltest Helper'}</span>
+      <span id="cm-title">🏒 ${IS_BEV ? 'BEV-Fragenkatalog' : 'Regeltest Helper'} v${chrome.runtime.getManifest().version}</span>
       <button id="cm-toggle">▴</button>
     </div>
     <div id="cm-body">
@@ -164,6 +176,7 @@ function createOverlay() {
       <div id="cm-count"></div>
       <div id="cm-pending"></div>
       <button id="cm-autofill-btn" style="display:none">▶ Aktuelle Frage ausfüllen</button>
+      <button id="cm-compare-btn">🔎 Vergleichen &amp; Regelstellen (Shift+F)</button>
       <button id="cm-learn-btn" style="display:none">📖 Antworten lernen</button>
       <button id="cm-harvest-btn" style="display:none">🤖 Pool automatisch durchlernen</button>
       <button id="cm-harvest-all-btn" style="display:none">🤖 Alle Pools durchlernen</button>
@@ -193,11 +206,28 @@ function createOverlay() {
   });
 
   document.getElementById('cm-autofill-btn').addEventListener('click', fillCurrentQuestion);
+  document.getElementById('cm-compare-btn').addEventListener('click', () => {
+    const lists = getQuestionLists();
+    if (!lists.length) return setStatus('⚠️ Keine Frage auf der Seite gefunden.');
+    renderCompare(lists);
+  });
 
   document.addEventListener('keydown', e => {
-    if (e.key.toLowerCase() !== 'f' || e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.key?.toLowerCase() !== 'f' || e.altKey || e.ctrlKey || e.metaKey) return;
     const t = e.target;
     if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+    if (e.shiftKey) {   // Shift+F toggles: compare bar + expanded widget ⇄ both closed
+      const panel = document.getElementById('cm-compare');
+      const collapsed = overlayEl.classList.contains('cm-collapsed');
+      if (panel) {
+        panel.remove();
+        clearQuestionHighlights();
+        if (!collapsed) document.getElementById('cm-toggle').click();
+        return;
+      }
+      if (collapsed) document.getElementById('cm-toggle').click();
+      return document.getElementById('cm-compare-btn').click();
+    }
     fillCurrentQuestion();
   });
   document.getElementById('cm-learn-btn').addEventListener('click', scrollAndLearn);
@@ -568,17 +598,309 @@ function mergePending() {
   return merged;
 }
 
+// ─── Fuzzy matching (abgewandelte Fragen) ─────────────────────────────────────
+// The stored data is full of near-duplicate "trap" pairs that differ in ONE content word
+// (AZ/NZ, innerhalb/außerhalb, team A/B, "+ Spieldauer", 2/5 Minuten, nicht, ...). So a
+// "similar enough" score alone is unsafe. Rule: apart from punctuation, case, umlauts and
+// filler words (articles, ...), the words must be the same in the same order — only typos allowed.
+const FILLER_WORDS = new Set(['der', 'die', 'das', 'den', 'dem', 'des', 'ein', 'eine', 'einen',
+  'einem', 'einer', 'eines', 'bzw', 'sowie', 'dabei', 'dann', 'hier', 'bitte', 'jeweils']);
+const FUZZY_MIN = 0.8;
+
+function tokenize(text) {
+  return normalizeText(text).normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/ß/g, 'ss').split(/[^a-z0-9]+/).filter(Boolean);
+}
+
+function editDistance(a, b) {
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j++)
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] !== b[j - 1]));
+    prev = cur;
+  }
+  return prev[b.length];
+}
+
+// Typo tolerance: none for short words (az/nz, a/b, 2/5), 1 from 5 chars, 2 from 10.
+const isTypo = (a, b) => editDistance(a, b) <= (Math.min(a.length, b.length) >= 10 ? 2 :
+                                                Math.min(a.length, b.length) >= 5 ? 1 : 0);
+
+// Word-by-word in order (word swaps can be traps too, e.g. "zuerst die kleine/große").
+// Returns the share of identical words, or 0 if any word differs by more than a typo.
+function similarity(a, b) {
+  const ta = tokenize(a).filter(w => !FILLER_WORDS.has(w));
+  const tb = tokenize(b).filter(w => !FILLER_WORDS.has(w));
+  if (!ta.length || ta.length !== tb.length) return 0;
+  let same = 0;
+  for (let i = 0; i < ta.length; i++) {
+    if (ta[i] === tb[i]) same++;
+    else if (!isTypo(ta[i], tb[i])) return 0;
+  }
+  return same / ta.length;
+}
+
+// ponytail: O(n) scan over all stored keys per call, fine for a few thousand entries.
+function fuzzyMatch(qText, sim = similarity, min = FUZZY_MIN, store = knownAnswers) {
+  const hits = [];
+  for (const [key, val] of Object.entries(store)) {
+    const keyText = key.split(/[|\x01]/)[0];
+    const score = sim(qText, keyText);
+    if (score >= min) hits.push({ score, val, keyText });
+  }
+  if (!hits.length) return null;
+  hits.sort((a, b) => b.score - a.score);
+  const best = hits[0];
+  const sameSet = v => JSON.stringify([...v].sort()) === JSON.stringify([...best.val].sort());
+  if (hits.some(h => h.score >= best.score - 0.05 && !sameSet(h.val))) {
+    console.log('[CM Helper] Fuzzy mehrdeutig, kein Auto-Fill:', qText.substring(0, 60));
+    return null;
+  }
+  console.log(`[CM Helper] Fuzzy-Match (${Math.round(best.score * 100)}%):`, qText.substring(0, 60));
+  return Object.assign([...best.val], { fuzzy: best.score, keyText: best.keyText });
+}
+
+// Saved answer → option element. Exact/strict match first, else most similar option.
+function findOption(items, savedAnswer, sim = similarity, min = FUZZY_MIN) {
+  const strict = items.find(i => answerMatches(i.text, savedAnswer));
+  if (strict) return strict;
+  let best = null, bestScore = min;
+  for (const i of items) {
+    const s = sim(i.text, savedAnswer);
+    if (s >= bestScore) { best = i; bestScore = s; }
+  }
+  return best;
+}
+
+// Dice coefficient on word sets — tolerant, so only ever used for the compare panel.
+function looseSimilarity(a, b) {
+  const A = new Set(tokenize(a)), B = new Set(tokenize(b));
+  if (!A.size || !B.size) return 0;
+  let common = 0;
+  A.forEach(w => { if (B.has(w)) common++; });
+  return 2 * common / (A.size + B.size);
+}
+
+// ─── Rulebook search (regelwerk.json, built locally by build-regelwerk.py) ────
+// BM25 over rule sections; query = question + options. Shows where to look, not an answer.
+let rules = null;   // [{ id, title, rule, text, terms: Map, len }]
+let ruleIdf = null;
+
+// Crude German suffix stripping, applied until stable so "kapitän/kapitäne/kapitänen" agree.
+const stem = w => {
+  for (let prev = ''; w !== prev && w.length > 4;) { prev = w; w = w.replace(/(en|er|es|em|e|n|s)$/, ''); }
+  return w;
+};
+const ruleTerms = text => tokenize(text).map(stem);
+
+async function loadRules() {
+  try {
+    const res = await fetch(chrome.runtime.getURL('regelwerk.json'));
+    if (!res.ok) return;
+    rules = (await res.json()).map(r => {
+      const terms = new Map();
+      ruleTerms(r.title + ' ' + r.text).forEach(t => terms.set(t, (terms.get(t) || 0) + 1));
+      return { ...r, terms, len: [...terms.values()].reduce((a, b) => a + b, 0) };
+    });
+    const df = new Map();
+    rules.forEach(r => r.terms.forEach((_, t) => df.set(t, (df.get(t) || 0) + 1)));
+    ruleIdf = t => Math.log(1 + (rules.length - (df.get(t) || 0) + 0.5) / ((df.get(t) || 0) + 0.5));
+  } catch { /* no regelwerk.json → feature off */ }
+}
+
+function searchRules(query, n = 3) {
+  if (!rules) return [];
+  const q = [...new Set(ruleTerms(query))];
+  const avg = rules.reduce((a, r) => a + r.len, 0) / rules.length;
+  return rules.map(r => ({
+    r,
+    score: q.reduce((sum, t) => {
+      const tf = r.terms.get(t) || 0;
+      return sum + (tf && ruleIdf(t) * tf * 2.2 / (tf + 1.2 * (0.25 + 0.75 * r.len / avg)));
+    }, 0),
+  })).sort((a, b) => b.score - a.score).slice(0, n).filter(h => h.score > 0);
+}
+
+// Sentence of the section that shares most terms with the query — as teaser.
+function bestSentence(text, query) {
+  const q = new Set(ruleTerms(query));
+  return text.split(/(?<=[.!?])\s+/).map(s => ({ s, hits: ruleTerms(s).filter(t => q.has(t)).length }))
+    .sort((a, b) => b.hits - a.hits)[0].s;
+}
+
+// Season updates (from the BEV Regel-Update PDF) that change a given rulebook section.
+const updatesFor = r => r.update ? [] : rules.filter(u => u.update &&
+  u.refs.some(ref => r.id === ref || r.id.startsWith(ref + '.')));
+
+function renderRules(query) {
+  const hits = searchRules(query);
+  if (!hits.length) return '';
+  const upd = u => `<div class="cm-cmp-update">🆕 <b>${escapeHtml(u.id.replace('🆕 ', ''))} – ` +
+    `${escapeHtml(u.title)} (${escapeHtml(u.rule)}):</b> ${escapeHtml(u.text)}</div>`;
+  return `<div class="cm-cmp-rules"><div class="cm-cmp-score">📖 Passende Regelstellen</div>` +
+    hits.map(({ r }) => r.update ? upd(r) :
+      `<details><summary><b>${escapeHtml(r.id)} ${escapeHtml(r.title)}</b>` +
+      `<span class="cm-cmp-rule">${escapeHtml(r.rule)}</span><br>„${escapeHtml(bestSentence(r.text, query))}“</summary>` +
+      `<div class="cm-cmp-ruletext">${escapeHtml(r.text)}</div></details>` +
+      updatesFor(r).map(upd).join('')).join('') + '</div>';
+}
+
+// ─── Compare panel: "Frage zu 90% identisch zu …" ─────────────────────────────
+// For questions that aren't known exactly, list the most similar stored questions (both
+// stores) with their options/solutions, and highlight the words that differ.
+const COMPARE_MIN = 0.6;
+const RIVAL_MIN = 0.8;
+
+function topSimilar(qText, n = 3) {
+  const hits = [];
+  [[knownAnswers, false], [otherAnswers, true]].forEach(([store, other]) => {
+    for (const [key, val] of Object.entries(store)) {
+      const [keyText, fp] = key.split(/[|\x01]/);
+      const score = looseSimilarity(qText, keyText);
+      if (score >= COMPARE_MIN) hits.push({ score, keyText, fp, val, other });
+    }
+  });
+  // Same question from both stores (BEV + ClassMarker) → show once, preferring the one with options.
+  const seen = new Set();
+  return hits.sort((a, b) => b.score - a.score || !!b.fp - !!a.fp).filter(h => {
+    const id = tokenize(h.keyText).join(' ') + '|' + h.val.map(canonAnswer).sort().join('|');
+    return !seen.has(id) && seen.add(id);
+  }).slice(0, n);
+}
+
+// Wraps words of `text` that don't occur in `otherText` in <mark>.
+function markDiff(text, otherText) {
+  const known = new Set(tokenize(otherText));
+  return text.split(/(\s+)/).map(w =>
+    tokenize(w).some(t => !known.has(t)) ? `<mark>${escapeHtml(w)}</mark>` : escapeHtml(w)).join('');
+}
+
+function renderCompare(lists) {
+  if (!lists.length) return;
+  let panel = document.getElementById('cm-compare');
+  clearQuestionHighlights();
+  const sections = lists.map((list, i) => {
+    const qText = getQuestionText(list);
+    const hits = topSimilar(qText);
+    // Trap check: another stored question ≥ RIVAL_MIN similar with a DIFFERENT solution
+    // (e.g. 87%: "der ref gibt das tor" → ja / "… erkennt das tor nicht an …" → nein).
+    const differ = (x, y) => JSON.stringify([...x.val].map(canonAnswer).sort()) !==
+                             JSON.stringify([...y.val].map(canonAnswer).sort());
+    const rival = hits.slice(1).find(h => h.score >= RIVAL_MIN && differ(h, hits[0]));
+    // Identical stored question → nothing differs from it; mark against the trap sibling instead.
+    const ref = hits[0]?.score === 1 ? rival : hits[0];
+    highlightQuestion(list, ref?.keyText);
+    const body = hits.length ? hits.map(h => {
+      const options = h.fp ? h.fp.split('\x00') : h.val;   // without fingerprint only solutions known
+      const opts = options.map(o => {
+        const ok = h.val.some(a => answerMatches(o, a));
+        return `<li class="${ok ? 'cm-ok' : ''}">${ok ? '✅' : '▫️'} ${escapeHtml(o)}</li>`;
+      }).join('');
+      const src = h.other ? (IS_BEV ? 'ClassMarker' : 'BEV') : (IS_BEV ? 'BEV' : 'ClassMarker');
+      return `<div class="cm-cmp-hit${h === ref ? ' cm-active' : ''}" data-key="${escapeHtml(h.keyText)}" title="Klicken: Frage oben gegen diese Frage markieren">
+        <div class="cm-cmp-score">${Math.round(h.score * 100)}% identisch · ${src}</div>
+        <div class="cm-cmp-q">${markDiff(h.keyText, qText)}</div>
+        <ul>${opts}</ul></div>`;
+    }).join('') : '<div class="cm-cmp-none">Keine ähnliche gespeicherte Frage gefunden.</div>';
+    // Measured on the data: the % alone says little — what matters is the rival (see above).
+    const verdict = !hits.length ? '' : rival
+      ? `<div class="cm-cmp-warn">⚠️ Achtung Falle: ${Math.round(rival.score * 100)}% ähnliche Frage mit ANDERER Lösung – auf die markierten Wörter achten.</div>`
+      : hits[0].score >= 0.95
+        ? `<div class="cm-cmp-good">✔ Eindeutig: keine ähnlich nahe Variante mit anderer Lösung${hits[1] ? ` (nächste: ${Math.round(hits[1].score * 100)}%)` : ''}.</div>`
+        : `<div class="cm-cmp-warn">⚠️ Keine Frage über 95% – eventuell neu oder stark umgebaut, selbst prüfen.</div>`;
+    const query = qText + ' ' + getAnswerItems(list).map(getAnswerText).join(' ');
+    return `<div class="cm-cmp-section" data-i="${i}"><div class="cm-cmp-now"><b>Jetzt:</b> <span class="cm-cmp-nowtext">${markDiff(qText, ref?.keyText || qText)}</span></div>${verdict}<div class="cm-cmp-grid">${body}${renderRules(query)}</div></div>`;
+  });
+  if (!sections.length) return;
+  if (!panel) {
+    panel = document.createElement('div');
+    panel.id = 'cm-compare';
+    document.body.appendChild(panel);
+    panel.addEventListener('click', e => {
+      if (e.target.id === 'cm-compare-close') { panel.remove(); clearQuestionHighlights(); return; }
+      const hit = e.target.closest('.cm-cmp-hit');
+      if (hit) selectCompareHit(hit);
+    });
+  }
+  panel.dataset.questions = JSON.stringify(lists.map(getQuestionText));
+  panel.innerHTML = `<div id="cm-compare-head"><span>🔎 Ähnliche Fragen – <mark>markiert</mark> = abweichende Wörter · Spalte anklicken = Frage oben dagegen markieren</span>
+    <button id="cm-compare-close">✕</button></div>${sections.join('')}`;
+}
+
+// Click on a column → mark the question (page + "Jetzt" line) against that stored question.
+function selectCompareHit(hit) {
+  const section = hit.closest('.cm-cmp-section');
+  const list = getQuestionLists()[+section.dataset.i];
+  if (!list) return;
+  const key = hit.dataset.key;
+  clearQuestionHighlights(getQuestionEl(list));
+  highlightQuestion(list, key);
+  section.querySelector('.cm-cmp-nowtext').innerHTML = markDiff(getQuestionText(list), key);
+  section.querySelectorAll('.cm-cmp-hit').forEach(h => h.classList.toggle('cm-active', h === hit));
+}
+
+// Marks the words of the question ON THE PAGE that don't occur in `otherText`.
+// Only wraps text nodes in <mark>, so textContent (used for matching) stays the same.
+function highlightQuestion(list, otherText) {
+  const el = getQuestionEl(list);
+  if (!el || !otherText) return;
+  const known = new Set(tokenize(otherText));
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(node => {
+    const parts = node.textContent.split(/(\s+)/);
+    if (!parts.some(w => tokenize(w).some(t => !known.has(t)))) return;
+    const frag = document.createDocumentFragment();
+    parts.forEach(w => {
+      if (!tokenize(w).some(t => !known.has(t))) return frag.append(w);
+      const m = document.createElement('mark');
+      m.className = 'cm-diff';
+      m.textContent = w;
+      frag.append(m);
+    });
+    node.replaceWith(frag);
+  });
+}
+
+function clearQuestionHighlights(root = document) {
+  if (!root) return;
+  root.querySelectorAll('mark.cm-diff').forEach(m => {
+    const parent = m.parentNode;
+    m.replaceWith(m.textContent);
+    parent.normalize();
+  });
+}
+
+// Panel stays open until the user closes it (✕); on a new question it switches to that one.
+function refreshCompare() {
+  const panel = document.getElementById('cm-compare');
+  if (!panel) return;
+  const lists = getQuestionLists();
+  const now = JSON.stringify(lists.map(getQuestionText));
+  if (lists.length && now !== panel.dataset.questions) renderCompare(lists);
+}
+
 // ─── Auto-fill on quiz page ───────────────────────────────────────────────────
 
+// Own store first; the other site's store only if nothing (not even fuzzy) matched here.
 function findBestMatch(listEl) {
+  const own = matchIn(listEl, knownAnswers);
+  if (own) return own;
+  const other = matchIn(listEl, otherAnswers);
+  return other && Object.assign([...other], { fuzzy: other.fuzzy, other: true });
+}
+
+function matchIn(listEl, store) {
   const fullKey = getQuestionKey(listEl);
   const qText   = getQuestionText(listEl);
 
   // Exact full-key match (unambiguous — includes answer fingerprint)
-  if (knownAnswers[fullKey]) return knownAnswers[fullKey];
+  if (store[fullKey]) return store[fullKey];
 
   // Exact text-only match (backward compat with pre-fingerprint stored data)
-  if (knownAnswers[qText]) return knownAnswers[qText];
+  if (store[qText]) return store[qText];
 
   // Exact-text fallback across fingerprinted keys — strips a stored key's fingerprint suffix
   // (either legacy "|" or "\x01" format) before comparing, but still requires the FULL question
@@ -586,18 +908,16 @@ function findBestMatch(listEl) {
   // question (e.g. options shown in a different order), never a different-but-similarly-worded
   // one.
   //
-  // We deliberately do NOT do fuzzy/substring/"near enough" text matching here. The exam
-  // intentionally includes near-duplicate "trap" questions — same topic, a couple of words
-  // swapped, different correct answer, specifically designed to catch careless mistakes. A
-  // "close enough" match could silently apply the wrong trap question's answer, and ClassMarker
-  // doesn't let you go back to fix it afterwards. Leaving an unrecognized question unanswered
-  // (so you answer it yourself) is safer than guessing.
+  // Only if nothing matches exactly do we fall back to fuzzyMatch(). The exam includes
+  // near-duplicate "trap" questions (a couple of words swapped, different answer), so the
+  // fuzzy path only tolerates typos/punctuation/articles (see similarity()), bails out if
+  // similar stored questions disagree, and fuzzy fills are flagged in the status line.
   const candidates = [];
-  for (const [key, val] of Object.entries(knownAnswers)) {
+  for (const [key, val] of Object.entries(store)) {
     const keyText = key.split(/[|\x01]/)[0];
     if (keyText === qText) candidates.push(val);
   }
-  if (candidates.length === 0) return null;
+  if (candidates.length === 0) return fuzzyMatch(qText, similarity, FUZZY_MIN, store);
 
   const distinctSets = new Set(candidates.map(v => JSON.stringify([...v].sort())));
   if (distinctSets.size > 1) {
@@ -626,21 +946,24 @@ function fillQuestionList(list) {
   const saved = findBestMatch(list);
   if (!saved) return false;
 
-  let applied = false;
-  getAnswerItems(list).forEach(item => {
-    const t = getAnswerText(item);
-    if (!t) return;
-    if (saved.some(a => answerMatches(t, a))) {
-      ionClick(item);
-      applied = true;
-      console.log('[CM Helper] Clicked:', t.substring(0, 50));
-    }
+  const items = getAnswerItems(list).map(el => ({ el, text: getAnswerText(el) })).filter(i => i.text);
+  const picks = new Set(saved.map(a => findOption(items, a)).filter(Boolean));
+  // Fuzzy or other-site match: all saved answers must map to an option, else leave it to the user.
+  const unsure = saved.fuzzy || saved.other;
+  if (unsure && picks.size !== saved.length) {
+    console.log('[CM Helper] Unsicherer Match, Antworten passen nicht zu den Optionen — kein Auto-Fill.');
+    return false;
+  }
+  picks.forEach(i => {
+    ionClick(i.el);
+    console.log('[CM Helper] Clicked:', i.text.substring(0, 50));
   });
-  return applied;
+  if (picks.size && unsure) fuzzyFilled++;
+  return picks.size > 0;
 }
 
 function fillCurrentQuestion() {
-  if (Object.keys(knownAnswers).length === 0) {
+  if (!Object.keys(knownAnswers).length && !Object.keys(otherAnswers).length) {
     setStatus('⚠️ Keine gespeicherten Antworten vorhanden.');
     return;
   }
@@ -653,12 +976,15 @@ function fillCurrentQuestion() {
   }
 
   let filled = 0;
+  const unsure = [];
+  fuzzyFilled = 0;
   lists.forEach(list => {
     const qText = getQuestionText(list);
     const match = findBestMatch(list);
     console.log('[CM Helper] Frage:', qText.substring(0, 60));
     console.log('[CM Helper] Key:', getQuestionKey(list).substring(0, 80));
     console.log('[CM Helper] Match:', match);
+    if (!match || match.fuzzy || match.other) unsure.push(list);
     if (match) {
       if (fillQuestionList(list)) filled++;
     } else {
@@ -666,7 +992,13 @@ function fillCurrentQuestion() {
     }
   });
 
-  setStatus(filled > 0 ? `✅ ${filled} Frage(n) ausgefüllt` : '⚠️ Kein Match — Details in Konsole (F12).');
+  renderCompare(unsure);
+
+  const fuzzyNote = fuzzyFilled ? ` (⚠️ ${fuzzyFilled} davon ähnlich oder aus dem anderen Katalog – bitte prüfen)` : '';
+  const cmpNote = unsure.length ? ' · 🔎 Ähnliche Fragen im Vergleichsfenster unten.' : '';
+  setStatus(filled > 0 ? `✅ ${filled} Frage(n) ausgefüllt${fuzzyNote}${cmpNote}`
+    : unsure.length ? '🔎 Nicht exakt bekannt – ähnliche Fragen im Vergleichsfenster unten.'
+    : '⚠️ Kein Match — Details in Konsole (F12).');
 }
 
 // ─── Single observer: tracks selections + auto-fills new questions ────────────
@@ -718,12 +1050,13 @@ function startMainObserver() {
         return;
       }
       if (!isOnQuizPage()) return;
+      refreshCompare();
 
       // Always check for immediate per-question feedback first, even with an empty store —
       // this is how we bootstrap answers from scratch in practice mode.
       learnFromVisibleFeedback();
 
-      if (Object.keys(knownAnswers).length === 0) return;
+      if (!Object.keys(knownAnswers).length && !Object.keys(otherAnswers).length) return;
 
       const hasUnfilled = getQuestionLists().some(list => {
         const alreadyChecked = list.querySelector(
@@ -1017,6 +1350,7 @@ function importAnswers(file) {
 
 async function init() {
   await loadAnswers();
+  loadRules();
   createOverlay();
 
   if (isOnResultPage()) {
