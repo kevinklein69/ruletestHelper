@@ -722,6 +722,7 @@ function looseSimilarity(a, b) {
 // BM25 over rule sections; query = question + options. Shows where to look, not an answer.
 let rules = null;   // [{ id, title, rule, text, terms: Map, len }]
 let ruleIdf = null;
+let ruleWords = new Map();   // raw word → count, for splitting compounds in questions
 
 // Crude German suffix stripping, applied until stable so "kapitän/kapitäne/kapitänen" agree.
 const stem = w => {
@@ -735,7 +736,7 @@ const SYNONYMS = {
   th: 'torhüter', ref: 'schiedsrichter', refs: 'schiedsrichter', sr: 'schiedsrichter',
   lp: 'linienrichter', linesman: 'linienrichter', ps: 'strafschuss', penaltyschuss: 'strafschuss',
   penalty: 'strafschuss', vz: 'verteidigungszone', az: 'angriffszone', nz: 'neutrale', ez: 'endzone',
-  roughing: 'übertriebene', overtime: 'verlängerung', ja: '', nein: '',
+  roughing: 'übertriebene', overtime: 'verlängerung', spd: 'spieldauer', ja: '', nein: '',
 };
 // Cut to 7 chars so inflections the suffix stripper misses still meet ("verschiebt"/"Verschiebens").
 // Rulebook says "Time-out" in the text, questions say "Auszeit".
@@ -748,7 +749,10 @@ async function loadRules() {
     if (!res.ok) return;
     rules = (await res.json()).map(r => {
       const terms = new Map();
-      ruleTerms(r.title + ' ' + r.text).forEach(t => terms.set(t, (terms.get(t) || 0) + 1));
+      // rule name too: sections are often just "59.2 Kleine Strafe" under "Regel 59 – Check mit dem Stock"
+      const all = r.title + ' ' + r.rule + ' ' + r.text;
+      ruleTerms(all).forEach(t => terms.set(t, (terms.get(t) || 0) + 1));
+      tokenize(all).forEach(w => ruleWords.set(w, (ruleWords.get(w) || 0) + 1));
       return { ...r, terms, len: [...terms.values()].reduce((a, b) => a + b, 0) };
     });
     const df = new Map();
@@ -757,7 +761,21 @@ async function loadRules() {
   } catch { /* no regelwerk.json → feature off */ }
 }
 
-function searchRules(query, n = 4) {
+// Questions glue words the rulebook keeps apart ("Stockcheck" vs. "Check mit dem Stock"):
+// append the parts of a word if both parts are more common rulebook words than the word itself.
+function splitCompounds(text) {
+  const parts = [];
+  for (const w of tokenize(text)) {
+    const n = ruleWords.get(w) || 0;
+    for (let i = 4; i <= w.length - 4; i++) {
+      const a = w.slice(0, i), b = w.slice(i);
+      if ((ruleWords.get(a) || 0) > n && (ruleWords.get(b) || 0) > n) { parts.push(a, b); break; }
+    }
+  }
+  return parts.length ? text + ' ' + parts.join(' ') : text;
+}
+
+function searchRules(query, n = 5) {
   if (!rules) return [];
   const q = [...new Set(ruleTerms(query))];
   const avg = rules.reduce((a, r) => a + r.len, 0) / rules.length;
@@ -792,7 +810,7 @@ const markKeys = (text, keys) => text.split(/(\s+)/).map(w =>
   ruleTerms(w).some(t => keys.has(t)) ? `<mark class="cm-key">${escapeHtml(w)}</mark>` : escapeHtml(w)).join('');
 
 function renderRules(question, answers) {
-  const query = question + ' ' + answers;
+  const query = splitCompounds(question + ' ' + answers);
   const hits = searchRules(query);
   if (!hits.length) return '';
   const keys = answerKeys(question, answers), hl = t => markKeys(t, keys);
