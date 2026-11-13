@@ -884,7 +884,9 @@ function renderCompare(lists) {
       if (hit) selectCompareHit(hit);
     });
   }
-  panel.dataset.questions = JSON.stringify(lists.map(getQuestionText));
+  const questions = JSON.stringify(lists.map(getQuestionText));
+  if (questions !== panel.dataset.questions) panel.scrollTop = 0;   // new question → back to the top
+  panel.dataset.questions = questions;
   panel.innerHTML = `<div id="cm-compare-head"><span>🔎 Ähnliche Fragen – <mark>markiert</mark> = abweichende Wörter · Spalte anklicken = Frage oben dagegen markieren</span>
     <button id="cm-compare-close">✕</button></div>${sections.join('')}`;
 }
