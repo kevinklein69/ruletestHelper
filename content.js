@@ -728,10 +728,19 @@ const stem = w => {
   for (let prev = ''; w !== prev && w.length > 3;) { prev = w; w = w.replace(/(en|er|es|em|e|n|s)$/, ''); }
   return w;
 };
-// Questions use other words than the IIHF rulebook (stemmed form → rulebook term).
-const SYNONYMS = { penaltyschu: 'strafschu', penalty: 'strafschu' };
+// Questions use other words than the IIHF rulebook (question token → rulebook word, '' = ignore).
+// Abbreviations/anglicisms are counted from the stored questions (th 327×, ref 251×, ...).
+// "ja"/"nein" options are rare in the rulebook, so they'd count as strong evidence for random rules.
+const SYNONYMS = {
+  th: 'torhüter', ref: 'schiedsrichter', refs: 'schiedsrichter', sr: 'schiedsrichter',
+  lp: 'linienrichter', linesman: 'linienrichter', ps: 'strafschuss', penaltyschuss: 'strafschuss',
+  penalty: 'strafschuss', vz: 'verteidigungszone', az: 'angriffszone', nz: 'neutrale', ez: 'endzone',
+  roughing: 'übertriebene', overtime: 'verlängerung', ja: '', nein: '',
+};
 // Cut to 7 chars so inflections the suffix stripper misses still meet ("verschiebt"/"Verschiebens").
-const ruleTerms = text => tokenize(text).map(w => { w = stem(w); return (SYNONYMS[w] || w).slice(0, 7); });
+// Rulebook says "Time-out" in the text, questions say "Auszeit".
+const ruleTerms = text => tokenize(text.replace(/time\s*-?\s*outs?/gi, ' auszeit '))
+  .map(w => w in SYNONYMS ? tokenize(SYNONYMS[w])[0] : w).filter(Boolean).map(w => stem(w).slice(0, 7));
 
 async function loadRules() {
   try {
@@ -774,16 +783,26 @@ function bestSentence(text, query) {
 const updatesFor = r => r.update ? [] : rules.filter(u => u.update &&
   u.refs.some(ref => r.id === ref || r.id.startsWith(ref + '.')));
 
-function renderRules(query) {
+// Key words of the answers (not already in the question, no filler like "der"/"und") in rule text.
+function answerKeys(question, answers) {
+  const q = new Set(ruleTerms(question));
+  return new Set(ruleTerms(answers).filter(t => !q.has(t) && t.length > 3 && ruleIdf(t) > 2));
+}
+const markKeys = (text, keys) => text.split(/(\s+)/).map(w =>
+  ruleTerms(w).some(t => keys.has(t)) ? `<mark class="cm-key">${escapeHtml(w)}</mark>` : escapeHtml(w)).join('');
+
+function renderRules(question, answers) {
+  const query = question + ' ' + answers;
   const hits = searchRules(query);
   if (!hits.length) return '';
+  const keys = answerKeys(question, answers), hl = t => markKeys(t, keys);
   const upd = u => `<div class="cm-cmp-update">🆕 <b>${escapeHtml(u.id.replace('🆕 ', ''))} – ` +
-    `${escapeHtml(u.title)} (${escapeHtml(u.rule)}):</b> ${escapeHtml(u.text)}</div>`;
-  return `<div class="cm-cmp-rules"><div class="cm-cmp-score">📖 Passende Regelstellen</div>` +
+    `${escapeHtml(u.title)} (${escapeHtml(u.rule)}):</b> ${hl(u.text)}</div>`;
+  return `<div class="cm-cmp-rules"><div class="cm-cmp-score">📖 Passende Regelstellen · <mark class="cm-key">markiert</mark> = Wörter aus den Antworten</div>` +
     hits.map(({ r }) => r.update ? upd(r) :
       `<details><summary><b>${escapeHtml(r.id)} ${escapeHtml(r.title)}</b>` +
-      `<span class="cm-cmp-rule">${escapeHtml(r.rule)}</span><br>„${escapeHtml(bestSentence(r.text, query))}“</summary>` +
-      `<div class="cm-cmp-ruletext">${escapeHtml(r.text)}</div></details>` +
+      `<span class="cm-cmp-rule">${escapeHtml(r.rule)}</span><br>„${hl(bestSentence(r.text, query))}“</summary>` +
+      `<div class="cm-cmp-ruletext">${hl(r.text)}</div></details>` +
       updatesFor(r).map(upd).join('')).join('') + '</div>';
 }
 
@@ -850,8 +869,8 @@ function renderCompare(lists) {
       : hits[0].score >= 0.95
         ? `<div class="cm-cmp-good">✔ Eindeutig: keine ähnlich nahe Variante mit anderer Lösung${hits[1] ? ` (nächste: ${Math.round(hits[1].score * 100)}%)` : ''}.</div>`
         : `<div class="cm-cmp-warn">⚠️ Keine Frage über 95% – eventuell neu oder stark umgebaut, selbst prüfen.</div>`;
-    const query = qText + ' ' + getAnswerItems(list).map(getAnswerText).join(' ');
-    return `<div class="cm-cmp-section" data-i="${i}"><div class="cm-cmp-now"><b>Jetzt:</b> <span class="cm-cmp-nowtext">${markDiff(qText, ref?.keyText || qText)}</span></div>${verdict}<div class="cm-cmp-grid">${body}${renderRules(query)}</div></div>`;
+    const answers = getAnswerItems(list).map(getAnswerText).join(' ');
+    return `<div class="cm-cmp-section" data-i="${i}"><div class="cm-cmp-now"><b>Jetzt:</b> <span class="cm-cmp-nowtext">${markDiff(qText, ref?.keyText || qText)}</span></div>${verdict}<div class="cm-cmp-grid">${body}${renderRules(qText, answers)}</div></div>`;
   });
   if (!sections.length) return;
   if (!panel) {
